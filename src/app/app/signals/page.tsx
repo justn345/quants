@@ -33,7 +33,7 @@ export default async function SignalsPage({ searchParams }: { searchParams: Prom
         <Link href="/app/markets" className="pill-tab flex shrink-0 items-center">+ All coins</Link>
       </nav>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+      <div className="grid items-start gap-6 xl:grid-cols-[1fr_340px]">
         <section className="hero-dark p-5 sm:p-7">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3"><CoinIcon coin={coin} size={44} /><div><h1 className="display text-2xl font-black">{coin} / USD</h1><p className="text-sm font-semibold text-mist">Hyperliquid perpetual · 24h <Pct v={snap ? +snap.change_24h_pct : null} /></p></div></div>

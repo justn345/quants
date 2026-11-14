@@ -7,7 +7,7 @@ export function GoogleLogin() {
   const [err, setErr] = useState("");
   return (
     <div>
-      <button className="btn w-full border-[1.5px] border-line bg-white text-ink shadow-sm hover:bg-paper" disabled={busy} onClick={async () => {
+      <button className="btn w-full bg-cream text-ink hover:bg-white" disabled={busy} onClick={async () => {
         setBusy(true); setErr("");
         const { error } = await browserClient().auth.signInWithOAuth({
           provider: "google",

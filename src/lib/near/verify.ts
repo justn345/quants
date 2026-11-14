@@ -58,8 +58,17 @@ async function nep413Hash(message: string, nonce: Buffer, recipient: string): Pr
 
 export const ACCOUNT_RE = /^(?=.{2,64}$)(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
+const RPCS = ["https://rpc.mainnet.fastnear.com", "https://rpc.mainnet.near.org"];
+
 async function isFullAccessKey(accountId: string, publicKey: string): Promise<boolean> {
-  const res = await fetch("https://rpc.mainnet.near.org", {
+  for (const rpc of RPCS) {
+    try { if (await checkKey(rpc, accountId, publicKey)) return true; } catch { /* try next */ }
+  }
+  return false;
+}
+
+async function checkKey(rpc: string, accountId: string, publicKey: string): Promise<boolean> {
+  const res = await fetch(rpc, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: "q", method: "query", params: { request_type: "view_access_key", finality: "final", account_id: accountId, public_key: publicKey } }),
   });
@@ -71,12 +80,15 @@ export async function verifyNearLogin(o: { accountId: string; publicKey: string;
   if (!ACCOUNT_RE.test(o.accountId)) return null;
   const nonce = checkNonce(o.nonce);
   if (!nonce) return null;
-  if (!/^ed25519:[1-9A-HJ-NP-Za-km-z]{32,50}$/.test(o.publicKey)) return null;
-  const pk = b58decode(o.publicKey.slice(8));
-  const sig = Buffer.from(o.signature, "base64");
+  const pkStr = o.publicKey.startsWith("ed25519:") ? o.publicKey : `ed25519:${o.publicKey}`;
+  if (!/^ed25519:[1-9A-HJ-NP-Za-km-z]{32,50}$/.test(pkStr)) return null;
+  const pk = b58decode(pkStr.slice(8));
+  // Wallets return the signature as base64 (most) or base58 (some): accept both.
+  let sig: Uint8Array = Buffer.from(o.signature, "base64");
+  if (sig.length !== 64) { try { sig = b58decode(o.signature.replace(/^ed25519:/, "")); } catch { return null; } }
   if (pk.length !== 32 || sig.length !== 64) return null;
   const hash = await nep413Hash(LOGIN_MESSAGE, nonce, LOGIN_RECIPIENT);
   if (!ed25519.verify(sig, hash, pk)) return null;
-  if (!(await isFullAccessKey(o.accountId, o.publicKey))) return null;
+  if (!(await isFullAccessKey(o.accountId, pkStr))) return null;
   return o.accountId;
 }
