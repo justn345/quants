@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* Quants palette (DESIGN.md). Flat, solid colours. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --night: #0f2a1d;      /* landing, login, sidebar */
+  --deep: #02060e;       /* intro */
+  --forest: #375534;
+  --sage: #6b9071;
+  --mist: #aec3b0;
+  --cream: #e3eed4;
+  --paper: #faf6f0;
+  --signal: #2ee59d;     /* long / positive / main buttons */
+  --brand: #007d10;
+  --lime: #c5e8a0;       /* chips, active */
+  --coral: #e5604d;      /* short / down / warnings */
+  --ink: #0b1410;
+  --ink-2: #33433a;      /* secondary text on light: still solid and readable */
+  --line: #dfe5da;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-night: var(--night);
+  --color-deep: var(--deep);
+  --color-forest: var(--forest);
+  --color-sage: var(--sage);
+  --color-mist: var(--mist);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-signal: var(--signal);
+  --color-brand: var(--brand);
+  --color-lime: var(--lime);
+  --color-coral: var(--coral);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-num);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-ui), system-ui, sans-serif; }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.display { font-family: var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Floating surfaces: solid cards, subtle border, layered soft shadow. */
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(15, 42, 29, 0.06), 0 8px 24px -12px rgba(15, 42, 29, 0.18);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 18px; border-radius: 999px; font-weight: 700; font-size: 15px;
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--signal); color: var(--ink); }
+.btn-primary:hover { background: #26d18e; }
+.btn-dark { background: var(--night); color: var(--cream); }
+.btn-dark:hover { background: #163a29; }
+.btn-ghost { background: transparent; color: inherit; border: 1.5px solid currentColor; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.chip-long { background: #d6f9ea; color: #04563a; }
+.chip-short { background: #fbe1dc; color: #8f2a1b; }
+.chip-flat { background: #e9eee6; color: var(--ink-2); }
+.label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+.input {
+  width: 100%; height: 46px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line);
+  background: #fff; color: var(--ink); font-size: 16px;
+}
+.input:focus { outline: none; border-color: var(--forest); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* Scroll reveal (respects reduced motion). */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
