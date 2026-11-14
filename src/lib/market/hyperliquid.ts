@@ -78,7 +78,7 @@ export async function fetchAllMids(): Promise<Record<Coin, number>> {
 
 export interface Candle { t: number; o: number; h: number; l: number; c: number; v: number }
 
-export async function fetchCandles(coin: Coin, interval: "15m" | "1h", hours: number): Promise<Candle[]> {
+export async function fetchCandles(coin: Coin, interval: "15m" | "1h" | "4h", hours: number): Promise<Candle[]> {
   const endTime = Date.now();
   const startTime = endTime - hours * 3600_000;
   type Raw = { t: number; o: string; h: string; l: string; c: string; v: string };

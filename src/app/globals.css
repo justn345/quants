@@ -40,14 +40,28 @@
 
 html { -webkit-text-size-adjust: 100%; }
 body { background: var(--paper); color: var(--ink); font-family: var(--font-ui), system-ui, sans-serif; }
+/* App canvas: soft grey-green so white cards float (reference dashboards). */
+.canvas { background: #edf1ea; }
+/* Dark hero panel (reference phone screens): deep forest with solid lime accents. */
+.hero-dark {
+  background: #0b2016;
+  color: var(--cream);
+  border-radius: 28px;
+  border: 1px solid rgba(174, 195, 176, 0.14);
+  box-shadow: 0 1px 0 rgba(227, 238, 212, 0.06) inset, 0 30px 60px -28px rgba(2, 6, 14, 0.75);
+}
+.tile-lime { background: #c9f26b; color: #0b1410; border-radius: 22px; }
+.pill-tab { height: 34px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.pill-tab[aria-selected="true"], .pill-tab.on { background: var(--night); color: var(--cream); }
+.pill-tab:not(.on):not([aria-selected="true"]) { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .display { font-family: var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
 
 /* Floating surfaces: solid cards, subtle border, layered soft shadow. */
 .card {
   background: #fff;
-  border: 1px solid rgba(15, 42, 29, 0.08);
-  border-radius: 22px;
+  border: 1px solid rgba(15, 42, 29, 0.06);
+  border-radius: 26px;
   box-shadow:
     0 1px 1px rgba(15, 42, 29, 0.04),
     0 4px 8px -2px rgba(15, 42, 29, 0.06),

@@ -40,11 +40,25 @@ export default async function Dashboard() {
 
       {/* Stat tiles */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="relative overflow-hidden rounded-[22px] bg-night p-5 text-cream shadow-[0_24px_48px_-20px_rgba(15,42,29,0.7)] sm:col-span-2 xl:col-span-1">
-          <div className="flex items-start justify-between"><p className="label text-mist">Market mood · your coins</p><Corner href="/app/signals" label="Open signals" dark /></div>
-          <p className="display mt-3 text-4xl font-black">{longs > shorts ? "Leaning long" : shorts > longs ? "Leaning short" : "No clear edge"}</p>
-          <div className="mt-4 flex flex-wrap gap-2 text-sm font-bold">
+        <div className="hero-dark p-5 sm:col-span-2 xl:col-span-1">
+          <div className="flex items-start justify-between"><p className="label text-mist">Market pulse · your coins</p><Corner href="/app/markets" label="Open markets" dark /></div>
+          <p className="display mt-3 text-3xl font-black">{longs > shorts ? "Leaning long" : shorts > longs ? "Leaning short" : "No clear edge"}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-bold">
             <span className="chip bg-signal text-night">▲ {longs} long</span><span className="chip bg-coral text-white">▼ {shorts} short</span><span className="chip bg-forest text-cream">● {d.signals.length - longs - shorts} flat</span>
+          </div>
+          {/* 24h change bars per followed coin */}
+          <div className="mt-5 flex h-28 items-end gap-2" aria-label="24 hour change per coin">
+            {d.watch.slice(0, 8).map((w) => { const s = snap(w.coin); const v = s ? +s.change_24h_pct : 0; const h = Math.max(10, Math.min(100, Math.abs(v) * 14 + 12)); return (
+              <div key={w.coin} className="flex flex-1 flex-col items-center gap-1.5">
+                <span className={`num text-[10px] font-extrabold ${v >= 0 ? "text-signal" : "text-coral"}`}>{v >= 0 ? "+" : ""}{v.toFixed(1)}</span>
+                <span className={`w-full max-w-[22px] rounded-full ${v >= 0 ? "bg-signal" : "bg-coral"}`} style={{ height: `${h}%` }} />
+                <span className="text-[10px] font-bold text-mist">{w.coin.replace(/^k/, "").slice(0, 4)}</span>
+              </div>
+            ); })}
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <Link href="/app/alerts" className="btn h-10 bg-[#c9f26b] text-sm text-night">+ Add alert</Link>
+            <Link href="/app/markets" className="btn h-10 bg-cream text-sm text-night">All coins</Link>
           </div>
         </div>
         {[
@@ -60,15 +74,18 @@ export default async function Dashboard() {
         ))}
       </section>
 
-      {/* Price cards */}
-      <section aria-label="Live prices" className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-        {d.watch.map((w) => { const s = snap(w.coin); return (
-          <Link key={w.coin} href={`/app/signals?coin=${encodeURIComponent(w.coin)}`} className="card p-4">
-            <div className="flex items-center gap-2"><CoinIcon coin={w.coin} size={28} /><span className="font-extrabold">{w.coin}</span><span className="ml-auto text-xs"><Pct v={s ? +s.change_24h_pct : null} /></span></div>
-            <p className="display num mt-3 text-xl font-black">{fmtUsd(s ? +s.price : null)}</p>
-            <div className="mt-2"><Spark coin={w.coin} group={coins} width={150} height={34} /></div>
-          </Link>
-        ); })}
+      {/* Price cards: one lime highlight, the rest white floating cards */}
+      <section aria-label="Live prices">
+        <div className="mb-3 flex items-end justify-between"><h2 className="display text-2xl font-black">Your coins</h2><Link href="/app/markets" className="text-sm font-bold underline">View all 179</Link></div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          {d.watch.map((w, i) => { const s = snap(w.coin); return (
+            <Link key={w.coin} href={`/app/signals?coin=${encodeURIComponent(w.coin)}`} className={`p-4 transition-transform hover:-translate-y-0.5 ${i === 0 ? "tile-lime shadow-[0_18px_36px_-16px_rgba(110,140,30,0.6)]" : "card"}`}>
+              <div className="flex items-center gap-2"><CoinIcon coin={w.coin} size={30} /><span className="font-extrabold">{w.coin}</span><span className="ml-auto text-xs">{i === 0 ? <b>{s ? `${+s.change_24h_pct >= 0 ? "+" : ""}${(+s.change_24h_pct).toFixed(2)}%` : "–"}</b> : <Pct v={s ? +s.change_24h_pct : null} />}</span></div>
+              <p className="display num mt-3 text-2xl font-black">{fmtUsd(s ? +s.price : null)}</p>
+              <div className="mt-2"><Spark coin={w.coin} group={coins} width={170} height={36} /></div>
+            </Link>
+          ); })}
+        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
