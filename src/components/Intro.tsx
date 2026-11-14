@@ -57,7 +57,7 @@ export function Intro({ progress, onDone }: { progress: number; onDone: () => vo
           ctx.strokeStyle = `rgba(46,229,157,${1 - fadeOut})`;
           ctx.lineWidth = 3 * dpr; ctx.lineJoin = "round";
           ctx.beginPath();
-          for (let i = 0; i <= 200 * line; i++) { const k = i / 200; const x = bx + k * bw, y = by + path(k) * bh; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+          for (let i = 0; i <= 200 * line; i++) { const k = i / 200; const x = bx + k * bw, y = by + path(k) * bh; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
           ctx.stroke();
         }
       }
