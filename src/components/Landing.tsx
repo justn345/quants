@@ -50,7 +50,7 @@ export function Landing() {
             <p className="chip bg-lime text-night">AI market alerts · 170+ coins</p>
             <h1 className="display mt-5 text-5xl font-black leading-[0.95] sm:text-7xl">Never miss<br />the move.</h1>
             <p className="mt-6 max-w-xl text-lg font-medium text-mist">
-              Quants watches the market for you. Clear long/short signals, alerts at your own price levels on Telegram, and a one-tap trade that settles in your own wallet.
+              Quants AI watches the market for you. Clear long/short signals, alerts at your own price levels on Telegram, and a one-tap trade that settles in your own wallet.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <TryDemoButton className="btn btn-primary h-12 px-6 text-base" />
@@ -139,9 +139,9 @@ export function Landing() {
 
       <section id="about" className="px-4 py-20 sm:px-8">
         <div className="reveal mx-auto grid max-w-6xl gap-10 lg:grid-cols-2">
-          <h2 className="display text-4xl font-black sm:text-5xl">About Quants</h2>
+          <h2 className="display text-4xl font-black sm:text-5xl">About Quants AI</h2>
           <div className="space-y-4 text-lg font-medium text-mist">
-            <p>Quants is an AI market agent that tells you when to act before the move passes. It reads public Hyperliquid market data once a minute for everyone, writes one short analysis per coin every 15 minutes, and alerts each person only about what they chose.</p>
+            <p>Quants AI is a market agent that tells you when to act before the move passes. It reads public Hyperliquid market data once a minute for everyone, writes one short analysis per coin every 15 minutes, and alerts each person only about what they chose.</p>
             <p><b className="text-cream">Built on NEAR.</b> Spot trades settle through NEAR Intents into your own wallet: Quants never holds funds. Analysis runs on NEAR AI Cloud. You can sign in with a NEAR wallet.</p>
           </div>
         </div>

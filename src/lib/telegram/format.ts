@@ -91,7 +91,7 @@ export function checkinMessage(rows: { coin: string; price: number; label: strin
     ...rows.map((r) => `${icon(r.direction)} <b>${esc(r.coin)}</b> ${fmtPx(r.price)} · ${r.direction === "none" ? "Wait" : esc(r.label)}`),
     "", "Turn check-ins off in Settings.", `<i>${DISCLAIMER}</i>`,
   ];
-  return { text: lines.join("\n"), reply_markup: { inline_keyboard: [[{ text: "Open Quants", web_app: { url: appUrl } }]] } };
+  return { text: lines.join("\n"), reply_markup: { inline_keyboard: [[{ text: "Open Quants AI", web_app: { url: appUrl } }]] } };
 }
 
 /** Main menu shown on /start and /menu. */
@@ -99,6 +99,6 @@ export function menuMarkup(appUrl: string): TgMessage["reply_markup"] {
   return { inline_keyboard: [
     [{ text: "My signals", callback_data: "menu:signals" }, { text: "My alerts", callback_data: "menu:alerts" }],
     [{ text: "Market check", callback_data: "menu:check" }, { text: "Watchlist", callback_data: "menu:watch" }],
-    [{ text: "Open Quants", web_app: { url: appUrl } }],
+    [{ text: "Open Quants AI", web_app: { url: appUrl } }],
   ] };
 }

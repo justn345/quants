@@ -11,7 +11,8 @@ export default async function TrackPage() {
   const cell = (o: string | null) => o === "hit_target" ? "bg-brand" : o === "hit_stop" ? "bg-coral" : o === "neither" ? "bg-mist" : "bg-white ring-1 ring-line";
   return (
     <div className="space-y-6">
-      <div><p className="label">Track record</p><h1 className="display text-3xl font-black sm:text-4xl">Every signal, scored honestly</h1>
+      <div><p className="label">Track record</p><h1 className="display text-3xl font-black sm:text-4xl">Public track record</h1>
+        <p className="mt-1 text-sm font-bold text-brand">All Quants AI signals across every coin, the same for every user. Not your personal history: that is on the Activity page.</p>
         <p className="mt-2 font-medium text-ink-2">Each long/short signal is checked after 4h and 24h: did price hit the target or the stop first? If both happened in the same 15-minute candle, we count it as a stop.</p></div>
       <div className="grid gap-4 sm:grid-cols-3">
         {[["Hit rate after 4h", rate("outcome_4h"), scored("outcome_4h").length], ["Hit rate after 24h", rate("outcome_24h"), scored("outcome_24h").length], ["Signals logged", rows.length, null]].map(([l, v, n]) => (

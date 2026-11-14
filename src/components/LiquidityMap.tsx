@@ -8,21 +8,21 @@ type L = { price: number; usd: number; side: "long_liq" | "short_liq"; distanceP
 type R = { price: number; levels: L[]; strongestAbove: L | null; strongestBelow: L | null; openInterestUsd: number };
 const big = (n: number) => n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${(n / 1e3).toFixed(0)}K`;
 
-export function LiquidityMap({ coin }: { coin: string }) {
+export function LiquidityMap({ coin, range = "48h", rows = 10 }: { coin: string; range?: string; rows?: number }) {
   const [d, setD] = useState<R | null>(null);
   const [err, setErr] = useState(false);
   useEffect(() => {
     let alive = true;
     setD(null); setErr(false);
-    fetch(`/api/liqmap?coin=${encodeURIComponent(coin)}`).then((r) => r.json()).then((j) => { if (!alive) return; if (j.levels) setD(j); else setErr(true); }).catch(() => alive && setErr(true));
+    fetch(`/api/liqmap?coin=${encodeURIComponent(coin)}&range=${range}`).then((r) => r.json()).then((j) => { if (!alive) return; if (j.levels) setD(j); else setErr(true); }).catch(() => alive && setErr(true));
     return () => { alive = false; };
-  }, [coin]);
+  }, [coin, range]);
 
   if (err) return <p className="text-sm font-semibold text-ink-2">Liquidity map unavailable right now.</p>;
   if (!d) return <div className="h-64 animate-pulse rounded-2xl bg-paper" aria-label="Loading liquidity map" />;
   const max = Math.max(...d.levels.map((l) => l.usd), 1);
-  const above = d.levels.filter((l) => l.price > d.price).slice(-10);
-  const below = d.levels.filter((l) => l.price < d.price).slice(0, 10);
+  const above = d.levels.filter((l) => l.price > d.price).slice(-rows);
+  const below = d.levels.filter((l) => l.price < d.price).slice(0, rows);
   const Row = ({ l }: { l: L }) => {
     const w = Math.max(3, (l.usd / max) * 100);
     const strong = l === d.strongestAbove || l === d.strongestBelow || (d.strongestAbove && l.price === d.strongestAbove.price) || (d.strongestBelow && l.price === d.strongestBelow.price);

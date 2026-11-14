@@ -1,6 +1,6 @@
 {
-  "name": "Quants: never miss the move",
-  "short_name": "Quants",
+  "name": "Quants AI: never miss the move",
+  "short_name": "Quants AI",
   "description": "AI market alerts and trading signals. Built on NEAR.",
   "start_url": "/app",
   "scope": "/",

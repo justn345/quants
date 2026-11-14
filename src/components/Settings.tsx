@@ -25,7 +25,8 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
   const [chain, setChain] = useState("base");
   const [addr, setAddr] = useState("");
   const done = (e: { error: unknown } | null, ok = "Saved.") => { setMsg(e?.error ? "Could not save. Check the values." : ok); router.refresh(); };
-  const zones = typeof Intl !== "undefined" && "supportedValuesOf" in Intl ? (Intl as unknown as { supportedValuesOf: (k: string) => string[] }).supportedValuesOf("timeZone") : ["UTC"];
+  const zones = typeof Intl !== "undefined" && "supportedValuesOf" in Intl ? (Intl as unknown as { supportedValuesOf: (k: string) => string[] }).supportedValuesOf("timeZone") : [];
+  if (!zones.includes("UTC")) zones.unshift("UTC");
   const uid = profile?.id;
 
   return (

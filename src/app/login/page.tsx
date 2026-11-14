@@ -40,7 +40,7 @@ export default function LoginPage() {
         </section>
 
         <section className="glass p-6 sm:p-8">
-          <h2 className="display text-3xl font-black">Sign in to Quants</h2>
+          <h2 className="display text-3xl font-black">Sign in to Quants AI</h2>
           <p className="mt-1 font-medium text-mist">Never miss the move. No email codes, no passwords.</p>
           <div className="mt-6 space-y-3">
             <TelegramLogin />

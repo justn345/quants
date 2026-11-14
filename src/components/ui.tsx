@@ -9,7 +9,7 @@ export function Logo({ size = 32, light = false }: { size?: number; light?: bool
         <circle cx="31" cy="31" r="15" fill="none" stroke={light ? "#007D10" : "#2EE59D"} strokeWidth="7" />
         <path d="M36 37 L48 49" stroke={light ? "#007D10" : "#2EE59D"} strokeWidth="7" strokeLinecap="round" />
       </svg>
-      <span className="display text-xl font-black tracking-tight">QUANTS</span>
+      <span className="display text-xl font-black tracking-tight">QUANTS<span className="text-signal"> AI</span></span>
     </span>
   );
 }
