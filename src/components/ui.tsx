@@ -1,5 +1,4 @@
 // Small shared UI pieces.
-/* eslint-disable @next/next/no-img-element */
 export const DISCLAIMER = "Not financial advice. Do your own research. Signals are estimates and are not guaranteed.";
 
 export function Logo({ size = 32, light = false }: { size?: number; light?: boolean }) {
@@ -15,20 +14,7 @@ export function Logo({ size = 32, light = false }: { size?: number; light?: bool
   );
 }
 
-const ICON_SYMBOL: Record<string, string> = { kPEPE: "PEPE", kSHIB: "SHIB", kBONK: "BONK" };
-
-/** Coin logo from Hyperliquid's public icon set, with a solid letter fallback. */
-export function CoinIcon({ coin, size = 28 }: { coin: string; size?: number }) {
-  const sym = ICON_SYMBOL[coin] ?? coin;
-  return (
-    <span className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-night text-cream font-bold" style={{ width: size, height: size, fontSize: size * 0.38 }}>
-      <span aria-hidden>{sym.slice(0, 2)}</span>
-      <img src={`https://app.hyperliquid.xyz/coins/${encodeURIComponent(coin)}.svg`} alt={`${sym} logo`} width={size} height={size} loading="lazy"
-        className="absolute inset-0 h-full w-full bg-white object-contain"
-        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-    </span>
-  );
-}
+export { CoinIcon } from "./CoinIcon";
 
 export function fmtUsd(p: number | null | undefined): string {
   if (p == null || !isFinite(p)) return "–";
