@@ -11,7 +11,12 @@ function load(coins: string[]) {
 /** Small 24h line chart. Green when up over the day, coral when down. */
 export function Spark({ coin, group, width = 120, height = 36, dark = false }: { coin: string; group: string[]; width?: number; height?: number; dark?: boolean }) {
   const [pts, setPts] = useState<number[]>([]);
-  useEffect(() => { load(group).then((s) => setPts(s[coin] ?? [])); }, [coin, group]);
+  const key = [...group].sort().join(","); // stable dependency: avoids a fetch loop
+  useEffect(() => {
+    let alive = true;
+    load(key.split(",")).then((s) => { if (alive) setPts(s[coin] ?? []); });
+    return () => { alive = false; };
+  }, [coin, key]);
   if (pts.length < 2) return <div style={{ width, height }} className={`rounded-lg ${dark ? "bg-forest/40" : "bg-paper"}`} aria-hidden />;
   const min = Math.min(...pts), max = Math.max(...pts), r = max - min || 1;
   const xy = pts.map((p, i) => [(i / (pts.length - 1)) * width, height - 3 - ((p - min) / r) * (height - 6)]);
