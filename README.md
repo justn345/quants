@@ -1,4 +1,4 @@
-# Quants: never miss the move
+# Quants AI: never miss the move
 
 **An AI market agent that reads crypto market structure, tells you when to act (or wait), and lets you trade from the alert without ever handing over your funds. Built on NEAR.**
 
@@ -46,12 +46,13 @@ Most retail crypto traders lose not because they have no idea, but because of **
 Quants is an **agent that works for each user individually**:
 
 1. **Watches the market for you.** 179 coins (every coin listed on Hyperliquid), refreshed every minute.
-2. **Reads market structure every 15 minutes**: funding rate, open-interest change, order-book walls, trend, and **estimated liquidation clusters** (a free, open version of a liquidation heatmap). It outputs one of three clear calls per coin: **Leaning long**, **Leaning short**, or **No clear edge (wait)**, with a key level, entry zone, stop and target, plus a two-line plain-English reason written by **NEAR AI**.
-3. **Only messages you about what you chose.** You pick your coins and which alert types you want per coin. Someone who only follows HYPE never gets a BTC message.
-4. **Remembers your own price levels.** "Tell me if SOL drops 5%", "HYPE at $25.07", "remind me tomorrow at 9am if BTC is below 95k". Any coin, any price, above or below. These are separate from signals: a reminder only tells you **your target was hit**.
-5. **Reaches you where you are**: Telegram, phone notifications (installable web app) and the dashboard.
-6. **Lets you act in one tap.** Every alert has a **Trade** button that opens a phone-first trade page with two tabs: **Leverage (long/short)**, where you fund your own Hyperliquid account **through NEAR Intents** from any chain and open the position with the signal's levels, and **Spot (buy/sell)**, which swaps **through NEAR Intents straight into your own wallet**. Quants never holds funds and is not an exchange.
-7. **Keeps itself honest.** Every signal is scored after 4h and 24h (hit target / hit stop / neither) and the real hit rate is shown publicly, even when it's low.
+2. **Shows a live Liquidity Map** for any of the 179 coins over 24H, 48H, 3D or 1W: where estimated liquidations are stacked above and below price.
+3. **Reads market structure every 15 minutes**: funding rate, open-interest change, order-book walls, trend, and **estimated liquidation clusters** (a free, open version of a liquidation heatmap). It outputs one of three clear calls per coin: **Leaning long**, **Leaning short**, or **No clear edge (wait)**, with a key level, entry zone, stop and target, plus a two-line plain-English reason written by **NEAR AI**.
+4. **Only messages you about what you chose.** You pick your coins and which alert types you want per coin. Someone who only follows HYPE never gets a BTC message.
+5. **Remembers your own price levels.** "Tell me if SOL drops 5%", "HYPE at $25.07", "remind me tomorrow at 9am if BTC is below 95k". Any coin, any price, above or below. These are separate from signals: a reminder only tells you **your target was hit**.
+6. **Reaches you where you are**: Telegram, phone notifications (installable web app) and the dashboard.
+7. **Lets you act in one tap.** Every alert has a **Trade** button that opens a phone-first trade page with two tabs: **Leverage (long/short)**, where you fund your own Hyperliquid account **through NEAR Intents** from any chain and open the position with the signal's levels, and **Spot (buy/sell)**, which swaps **through NEAR Intents straight into your own wallet**. Quants never holds funds and is not an exchange.
+8. **Keeps itself honest.** Every signal is scored after 4h and 24h (hit target / hit stop / neither) and the real hit rate is shown publicly, even when it's low.
 
 ### Who it helps
 - **Part-time traders** who can't watch charts but want to catch moves at levels they care about.
@@ -180,7 +181,8 @@ Quants never asks for seed phrases or private keys, and never holds funds. Demo 
 1. **Open** https://quants-vert.vercel.app. **See** a ~3-second coded intro (market-noise particles → a price line that dips and breaks up → the Q logo with BTC/ETH/SOL/BNB/HYPE in orbit), then the landing page with live prices.
 2. **Click Try demo.** **See** your **own** fresh demo account (no sign-up), pre-filled with a watchlist and 5 alerts: Dashboard with the market-pulse card (24h bars per coin), coin cards with live mini-charts, and signal cards with the NEAR AI reason and the liquidation-magnet gauge.
 3. **Type** `tell me if SOL drops 5% from now` in **Add alert** → **Check** → **See** the parsed rule → **Save alert**. Try `remind me tomorrow at 9am if BTC is below 95k` (parsed by NEAR AI).
-4. **Open Markets.** **See** all 179 coins with search and filters (*Spot via NEAR Intents*, *Top gainers*, *Top losers*), and a star to follow any coin.
+4. **Open Liquidity** (bottom tab). **See** the Liquidity Map: pick any coin and 24H / 48H / 3D / 1W to see the biggest stacks above (possible long target) and below (possible short target).
+5. **Open Markets.** **See** all 179 coins with search and filters (*Spot via NEAR Intents*, *Top gainers*, *Top losers*), and a star to follow any coin.
 5. **Click any coin** (e.g. BTC). **See** the big chart (24H / 7D / 30D) with the signal's stop and target drawn on it, the trade plan, the factor breakdown, and the **liquidity map** with the biggest stacks above and below.
 6. **Click Trade.** On **Leverage**: pick Long/Short and a leverage, enter margin, a Hyperliquid `0x` address and a refund address → **Check funding quote**. **See** NEAR Intents quote USDC straight into a Hyperliquid account. On **Spot**: pay with **USDC on Base** → **Check price** → **See** a live NEAR Intents swap quote. Quotes are dry, so nothing moves. In the demo, deposit addresses are disabled; signed-in users get a real one.
 7. **Open Track record.** **See** every signal as a dot and the real 4h / 24h hit rate.

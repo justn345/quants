@@ -62,7 +62,7 @@ export default async function Dashboard() {
           )}
           <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
             <Link href="/app/alerts" className="btn btn-lime h-11 text-sm">+ Add alert</Link>
-            <Link href="/app/liquidity" className="btn btn-light h-11 text-sm"><Layers className="h-4 w-4" />Liquidity map</Link>
+            <Link href="/app/liquidity" className="btn btn-light h-11 text-sm"><Layers className="h-4 w-4" />Liquidity</Link>
           </div>
         </section>
 
