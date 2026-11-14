@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Intro } from "./Intro";
 import { CoinIcon, Logo, Pct, fmtUsd } from "./ui";
 import { TryDemoButton } from "./TryDemoButton";
+import { SiteMenu } from "./SiteMenu";
 
 type Snap = { coin: string; price: number; change_24h_pct: number; spot_via_intents: boolean };
 const STRIP = ["BTC", "ETH", "SOL", "BNB", "HYPE"];
@@ -33,12 +34,10 @@ export function Landing() {
       <header className="sticky top-0 z-30 border-b border-forest bg-night/95 px-4 py-3 sm:px-8">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Logo light />
-          <nav className="hidden items-center gap-1 rounded-full border border-forest p-1 text-sm font-semibold md:flex">
-            {[["How it works", "#how"], ["Features", "#features"], ["About", "#about"], ["FAQ", "#faq"]].map(([l, h]) => (
-              <a key={h} href={h} className="rounded-full px-4 py-2 hover:bg-forest">{l}</a>
-            ))}
-          </nav>
-          <Link href="/login" className="btn btn-ghost h-10 text-cream">Sign in</Link>
+          <div className="flex items-center gap-2">
+            <Link href="/login" className="btn btn-primary h-10">Sign in</Link>
+            <SiteMenu />
+          </div>
         </div>
       </header>
 
@@ -55,7 +54,7 @@ export function Landing() {
               <Link href="/login" className="btn btn-ghost h-12 px-6 text-base text-cream">Sign in</Link>
             </div>
           </div>
-          <div className="rounded-3xl border border-forest bg-[#123222] p-5">
+          <div className="glass p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <span className="label text-mist">Alert · Telegram</span><span className="chip chip-long">▲ Leaning long</span>
             </div>
@@ -90,7 +89,7 @@ export function Landing() {
               ["2", "Get your alert on Telegram", "Only for the coins and alert types you turned on. It repeats until you tap Got it."],
               ["3", "Tap Trade", "Swap through NEAR Intents straight to your own wallet, or open the coin on Hyperliquid with the levels pre-filled."],
             ].map(([n, t, d]) => (
-              <div key={n} className="reveal rounded-3xl border border-forest p-6">
+              <div key={n} className="panel-dark reveal p-6">
                 <span className="display text-5xl font-black text-signal">{n}</span>
                 <h3 className="mt-4 text-xl font-extrabold">{t}</h3>
                 <p className="mt-2 font-medium text-mist">{d}</p>
@@ -112,7 +111,7 @@ export function Landing() {
               ["Telegram with a Trade button", "Readable alerts with levels, reason and a one-tap Trade button that opens inside Telegram."],
               ["Private AI on NEAR", "Market summaries and plain-English alert parsing run on NEAR AI Cloud. Your funds never touch Quants."],
             ].map(([t, d]) => (
-              <div key={t} className="card reveal p-6">
+              <div key={t} className="card lift reveal p-6">
                 <h3 className="text-lg font-extrabold">{t}</h3>
                 <p className="mt-2 font-medium text-ink-2">{d}</p>
               </div>
