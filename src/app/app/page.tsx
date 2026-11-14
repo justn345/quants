@@ -39,32 +39,34 @@ export default async function Dashboard() {
       </div>
 
       {/* Stat tiles */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="hero-dark p-5 sm:col-span-2 xl:col-span-1">
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="hero-dark flex flex-col p-6">
           <div className="flex items-start justify-between"><p className="label text-mist">Market pulse · your coins</p><Corner href="/app/markets" label="Open markets" dark /></div>
           <p className="display mt-3 text-3xl font-black">{longs > shorts ? "Leaning long" : shorts > longs ? "Leaning short" : "No clear edge"}</p>
           <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-bold">
             <span className="chip bg-signal text-night">▲ {longs} long</span><span className="chip bg-coral text-white">▼ {shorts} short</span><span className="chip bg-forest text-cream">● {d.signals.length - longs - shorts} flat</span>
           </div>
           {/* 24h change bars per followed coin */}
-          <div className="mt-5 flex h-28 items-end gap-2" aria-label="24 hour change per coin">
+          <div className="mt-5 flex h-36 items-stretch gap-3" aria-label="24 hour change per coin">
             {d.watch.slice(0, 8).map((w) => { const s = snap(w.coin); const v = s ? +s.change_24h_pct : 0; const h = Math.max(10, Math.min(100, Math.abs(v) * 14 + 12)); return (
-              <div key={w.coin} className="flex flex-1 flex-col items-center gap-1.5">
+              <div key={w.coin} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
                 <span className={`num text-[10px] font-extrabold ${v >= 0 ? "text-signal" : "text-coral"}`}>{v >= 0 ? "+" : ""}{v.toFixed(1)}</span>
-                <span className={`w-full max-w-[22px] rounded-full ${v >= 0 ? "bg-signal" : "bg-coral"}`} style={{ height: `${h}%` }} />
+                <span className="flex w-full max-w-[26px] flex-1 items-end"><span className={`w-full rounded-full ${v >= 0 ? "bg-signal" : "bg-coral"}`} style={{ height: `${h}%` }} /></span>
                 <span className="text-[10px] font-bold text-mist">{w.coin.replace(/^k/, "").slice(0, 4)}</span>
               </div>
             ); })}
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-2">
+          <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
             <Link href="/app/alerts" className="btn h-10 bg-[#c9f26b] text-sm text-night">+ Add alert</Link>
             <Link href="/app/markets" className="btn h-10 bg-cream text-sm text-night">All coins</Link>
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-4">
         {[
           ["Active alerts", String(active.length), "/app/alerts", `${d.alerts.filter((a) => a.status === "paused").length} paused`],
           ["Fired today", String(firedToday), "/app/alerts", "repeats until you tap Got it"],
           ["Coins you follow", String(coins.length), "/app/settings", "of 179 on Hyperliquid"],
+          ["Signal reasons", d.signals.filter((x) => x.reason_source === "ai").length + "/" + d.signals.length, "/app/signals", "written by NEAR AI"],
         ].map(([l, v, h, sub]) => (
           <div key={l} className="card p-5">
             <div className="flex items-start justify-between"><p className="label">{l}</p><Corner href={h} label={`Open ${l}`} /></div>
@@ -72,6 +74,7 @@ export default async function Dashboard() {
             <p className="mt-1 text-sm font-semibold text-ink-2">{sub}</p>
           </div>
         ))}
+        </div>
       </section>
 
       {/* Price cards: one lime highlight, the rest white floating cards */}
