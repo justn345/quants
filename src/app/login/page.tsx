@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo, Disclaimer } from "@/components/ui";
 import { TryDemoButton } from "@/components/TryDemoButton";
 import { NearLogin } from "@/components/NearLogin";
+import { GoogleLogin } from "@/components/GoogleLogin";
 
 export default function LoginPage() {
   return (
@@ -24,10 +25,12 @@ export default function LoginPage() {
       <section className="flex items-center justify-center bg-paper px-6 py-12">
         <div className="w-full max-w-sm space-y-4">
           <h2 className="display text-3xl font-black">Sign in to Quants</h2>
-          <p className="font-medium text-ink-2">No email codes. Pick one:</p>
-          <NearLogin />
+          <p className="font-medium text-ink-2">Sign in with Google, or try it instantly.</p>
+          <GoogleLogin />
           <TryDemoButton className="btn btn-primary w-full" />
           <p className="text-sm font-medium text-ink-2">The demo gives you your own pre-filled account. Nothing to set up.</p>
+          <div className="flex items-center gap-3 pt-2"><hr className="flex-1 border-line" /><span className="label">Optional</span><hr className="flex-1 border-line" /></div>
+          <NearLogin />
           <hr className="border-line" />
           <Disclaimer />
           <p className="text-sm font-semibold"><Link href="/terms" className="underline">Terms</Link> · <Link href="/privacy" className="underline">Privacy</Link> · <Link href="/risk" className="underline">Risk disclaimer</Link></p>

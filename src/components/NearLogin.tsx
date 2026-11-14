@@ -6,7 +6,7 @@ export function NearLogin() {
   const [err, setErr] = useState("");
   return (
     <div>
-      <button className="btn btn-dark w-full" disabled={busy} onClick={async () => {
+      <button className="btn btn-ghost w-full text-ink" disabled={busy} onClick={async () => {
         setBusy(true); setErr("");
         try {
           const { NearConnector } = await import("@hot-labs/near-connect");
@@ -28,7 +28,7 @@ export function NearLogin() {
           setErr(e instanceof Error ? e.message : "Sign-in failed");
           setBusy(false);
         }
-      }}>{busy ? "Waiting for your wallet…" : "Connect NEAR wallet"}</button>
+      }}>{busy ? "Waiting for your wallet…" : "Sign in with a NEAR wallet"}</button>
       <p className="mt-1 text-xs font-medium text-ink-2">Signs a message only. No transaction, no fees.</p>
       {err && <p role="alert" className="mt-2 text-sm font-semibold text-coral">{err}</p>}
     </div>
