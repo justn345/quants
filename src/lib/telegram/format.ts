@@ -32,7 +32,7 @@ function buttons(tradeUrl: string, ackData?: string, chartUrl?: string): TgMessa
   const row: InlineButton[] = [{ text: "Trade", web_app: { url: tradeUrl } }];
   if (ackData) row.push({ text: "Got it", callback_data: ackData });
   const rows: InlineButton[][] = [row];
-  if (chartUrl) rows.push([{ text: "Chart & liquidity map", url: chartUrl }]);
+  if (chartUrl) rows.push([{ text: "Chart & liquidity map", web_app: { url: chartUrl } }]);
   return { inline_keyboard: rows };
 }
 
@@ -56,7 +56,7 @@ export function signalMessage(s: Signal, reason: string, tradeUrl: string, chart
   if (s.direction === "none") {
     const lines = [`<b>QUANTS SIGNAL · ${esc(s.coin)} · WAIT</b>`, `Price ${fmtPx(s.price)}`, "",
       "The edge is gone: no clear setup right now. Quants keeps watching and will tell you when one appears.", "", esc(reason), "", `<i>${DISCLAIMER}</i>`];
-    return { text: lines.join("\n"), reply_markup: chartUrl ? { inline_keyboard: [[{ text: "Chart & liquidity map", url: chartUrl }]] } : undefined };
+    return { text: lines.join("\n"), reply_markup: chartUrl ? { inline_keyboard: [[{ text: "Chart & liquidity map", web_app: { url: chartUrl } }]] } : undefined };
   }
   const lines = [`<b>QUANTS SIGNAL · ${esc(s.coin)} · ${esc(s.label.toUpperCase())}</b>`, `Price ${fmtPx(s.price)}`, "", signalBlock(s, reason), "", `<i>${DISCLAIMER}</i>`];
   return { text: lines.join("\n"), reply_markup: buttons(tradeUrl, undefined, chartUrl) };

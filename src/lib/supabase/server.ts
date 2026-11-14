@@ -12,6 +12,7 @@ const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function userClient() {
   const store = await cookies();
   return createServerClient(SUPABASE_URL, ANON, {
+    cookieOptions: { sameSite: "none", secure: true, path: "/" },
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {
