@@ -14,7 +14,43 @@
 
 ---
 
+## Core features at a glance
+
+### 1. Liquidity Map: see where the market is likely to go
+Pick any of 179 coins and a window (24H, 48H, 3D or 1W). Quants AI shows where liquidations are stacked **above** price (a magnet that can pull price up: a possible **long** target) and **below** price (a sweep zone: a possible **short** target). It's a free, built-in alternative to paid liquidation heatmaps.
+
+<p align="center"><img src="docs/images/liquidity-map.jpg" alt="Quants AI Liquidity Map: estimated liquidation stacks above and below the BTC price" width="820"></p>
+
+### 2. Clear signals with a reason, written by NEAR AI
+Every 15 minutes the agent reads market structure for the coins people follow and gives one clear call: **Leaning long**, **Leaning short** or **Wait**, with entry, stop and target, a liquidity-magnet gauge, and a two-line reason written privately by **NEAR AI Cloud**. Every call is scored after 4h and 24h on a public track record.
+
+<p align="center"><img src="docs/images/signal-detail.jpg" alt="BTC signal page: live chart, trade plan, NEAR AI reason and factor breakdown" width="820"></p>
+
+### 3. Alerts that reach you on Telegram, with a Trade button
+Only for the coins and alert types you choose. Signals, **WAIT** messages, liquidity magnets ("possible SHORT toward $598.48") and your own price targets arrive in [@QuantsSignal_Bot](https://t.me/QuantsSignal_Bot), each with **Trade** and **Chart & liquidity map** buttons. The bot has a menu (My signals, My alerts, Market check, Watchlist) and opens the full app inside Telegram.
+
+<p align="center">
+  <img src="docs/images/telegram-alerts.png" alt="Telegram: a Quants AI signal and a liquidity magnet alert with Trade buttons" width="32%">
+  <img src="docs/images/telegram-menu.png" alt="Telegram: connected confirmation and bot menu" width="32%">
+  <img src="docs/images/telegram-mini-app.png" alt="Quants AI opened inside Telegram as a Mini App" width="32%">
+</p>
+
+### 4. One-tap trades through NEAR Intents, without custody
+**Leverage (long/short):** fund your own Hyperliquid account through **NEAR Intents** from USDC/USDT on any chain, then open the position with the signal's levels. **Spot (buy/sell):** swap through **NEAR Intents** straight into your own wallet. Quants AI never holds funds.
+
+### 5. A dashboard built for phones and desktops
+Market pulse for your coins, a "Get your alerts" card (Telegram + phone push), your watchlist with live mini-charts, and the latest signals. Installable as an app with phone notifications.
+
+<p align="center">
+  <img src="docs/images/dashboard.jpg" alt="Quants AI dashboard on desktop" width="62%">
+  <img src="docs/images/home-mobile.jpg" alt="Quants AI home screen on a phone" width="22%">
+  <img src="docs/images/trade-leverage-mobile.jpg" alt="Leverage tab funded through NEAR Intents on a phone" width="22%">
+</p>
+
+---
+
 ## Contents
+0. [Core features at a glance](#core-features-at-a-glance)
 1. [The problem](#1-the-problem)
 2. [What Quants does](#2-what-quants-does)
 3. [How NEAR is used (in detail)](#3-how-near-is-used-in-detail)
