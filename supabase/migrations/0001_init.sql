@@ -188,7 +188,10 @@ alter table public.trades enable row level security;
 -- Profiles: own row only. Users may not make themselves admin/demo or set their Telegram chat id.
 create policy profiles_select_own on public.profiles for select using (auth.uid() = id);
 create policy profiles_update_own on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
-revoke update (is_admin, is_demo, telegram_chat_id) on public.profiles from authenticated, anon;
+-- Column-level revokes don't override a table-level grant, so revoke the table, then grant safe columns.
+revoke insert, update, delete on public.profiles from authenticated, anon;
+grant update (display_name, avatar_url, time_zone, near_account, quiet_start, quiet_end,
+              max_alerts_per_day, repeat_gap_min, onboarded) on public.profiles to authenticated;
 
 create policy watchlist_own on public.watchlist for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy alerts_own on public.alerts for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -201,7 +204,12 @@ create policy market_snapshots_read on public.market_snapshots for select using 
 create policy signals_read on public.signals for select using (true);
 
 -- Users cannot change the server-managed alert fields directly (sent_count, fired_at...).
-revoke update (sent_count, fired_at, fired_price, last_sent_at) on public.alerts from authenticated, anon;
+revoke update on public.alerts from authenticated, anon;
+grant update (coin, kind, direction, price, percent, remind_at, note, status, repeat_max, repeat_gap_min,
+              acknowledged_at) on public.alerts to authenticated;
+-- Server-only tables: no access for browser roles at all.
+revoke all on public.telegram_link_codes, public.ai_usage, public.ask_usage from authenticated, anon;
+revoke insert, update, delete on public.market_snapshots, public.signals, public.notifications, public.trades from authenticated, anon;
 
 -- New sign-ups get a profile and the five featured coins.
 create function public.handle_new_user() returns trigger
