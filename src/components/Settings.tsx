@@ -34,6 +34,10 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
       <div><p className="label">Profile & settings</p><h1 className="display text-3xl font-black sm:text-4xl">Settings</h1></div>
       {msg && <p role="status" className="chip bg-lime px-4 py-2 text-sm text-night">{msg}</p>}
 
+      <nav aria-label="More" className="grid grid-cols-3 gap-2 lg:hidden">
+        {[["/app/signals","Signals"],["/app/track","Track record"],["/app/activity","Activity"]].map(([h,l]) => <a key={h} href={h} className="btn btn-light h-11 text-sm">{l}</a>)}
+      </nav>
+
       <ProfileCard uid={String(profile?.id)} name={(profile?.display_name as string) ?? ""} bio={(profile?.bio as string) ?? ""} avatar={(profile?.avatar_url as string) ?? null} checkins={profile?.notify_checkins !== false} demo={!!profile?.is_demo} />
 
       <PushToggle />

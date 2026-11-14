@@ -88,9 +88,11 @@ export function Intro({ progress, onDone }: { progress: number; onDone: () => vo
       <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
       <div className="relative flex flex-col items-center" style={{ opacity: qIn, transform: `scale(${0.85 + 0.15 * qIn})` }}>
         <div className="relative h-44 w-44">
-          <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-24 w-24">
-            <circle cx="31" cy="31" r="15" fill="none" stroke="#2EE59D" strokeWidth="6" />
-            <path d="M36 37 L48 49" stroke="#2EE59D" strokeWidth="6" strokeLinecap="round" />
+          <svg viewBox="0 0 512 512" className="absolute inset-0 m-auto h-24 w-24">
+            <circle cx="246" cy="246" r="132" fill="none" stroke="#F2F0E6" strokeWidth="44" />
+            <path d="M296 296 L398 398" stroke="#F2F0E6" strokeWidth="44" />
+            <path d="M172 296 L232 236 L264 268 L318 214" fill="none" stroke="#2EE59D" strokeWidth="28" />
+            <path d="M282 198 L330 198 L330 246" fill="none" stroke="#2EE59D" strokeWidth="28" />
           </svg>
           <div className="absolute inset-0 rounded-full border border-forest" style={{ opacity: orbit }} />
           {COINS.map((c, i) => {

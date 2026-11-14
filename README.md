@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/logo.png" alt="Quants AI logo" width="96"></p>
+
 # Quants AI: never miss the move
 
 **An AI market agent that reads crypto market structure, tells you when to act (or wait), and lets you trade from the alert without ever handing over your funds. Built on NEAR.**
@@ -172,7 +174,7 @@ Pure maths, so they work even without AI ([`src/lib/market/signals.ts`](src/lib/
 | Order-book walls | Bids vs asks within 1% of price | Bid-heavy books support price, ask-heavy cap it |
 | Liquidity magnet | Estimated liquidation clusters | The bigger and closer stack pulls price toward it |
 
-Weighted score ≥ +1.2 → **Leaning long**, ≤ −1.2 → **Leaning short**, otherwise **No clear edge (wait)**. Levels: entry zone around price, stop 1.5 ATR away (or beyond the nearest wall), target 2.5 ATR away **or the nearest big liquidation stack**.
+Weighted score ≥ +1.2 → **Leaning long**, ≤ −1.2 → **Leaning short**, otherwise **No clear edge (wait)**. For long/short calls: entry zone around price, stop 1.5 ATR away (or beyond the nearest wall), target 2.5 ATR away **or the nearest big liquidation stack**. For **Wait**, Quants AI shows no entry/stop/target, only the key level and the nearest liquidity stacks above and below to watch.
 
 ### Long or short from liquidity
 Liquidity stacked **above** price = short positions that would be liquidated on a move up. Price is often pulled **up** to sweep them: a **possible long** toward the stack. Liquidity stacked **below** = long positions that would be liquidated on a move down: a **possible short**. That's why a market that is going up but has its big stack **below** can still lean short. The magnet factor in the score and the LIQUIDITY MAGNET alert both follow this logic.
@@ -215,16 +217,16 @@ Quants never asks for seed phrases or private keys, and never holds funds. Demo 
 ## 9. Try it: step by step for judges
 
 1. **Open** https://quants-vert.vercel.app. **See** a ~3-second coded intro (market-noise particles → a price line that dips and breaks up → the Q logo with BTC/ETH/SOL/BNB/HYPE in orbit), then the landing page with live prices.
-2. **Click Try demo.** **See** your **own** fresh demo account (no sign-up), pre-filled with a watchlist and 5 alerts: Dashboard with the market-pulse card (24h bars per coin), coin cards with live mini-charts, and signal cards with the NEAR AI reason and the liquidation-magnet gauge.
+2. **Click Try demo.** **See** your **own** fresh demo account (no sign-up) with a **Demo mode** banner, pre-filled with a watchlist, 5 alerts and a few clearly labelled **sample** events. The demo is a **sandbox**: every feature works on live data, but nothing real happens. No Telegram or phone messages are sent (except a one-off "Connected" reply if you link Telegram), quotes are dry only, the account is capped at 10 alerts, and it is deleted automatically after 48 hours. **See** the Dashboard: the market-pulse card (24h bars per coin), the watchlist with live mini-charts, and signal cards with the NEAR AI reason. Coins with no clear edge show **Wait** plus the key levels instead of entry/stop/target.
 3. **Type** `tell me if SOL drops 5% from now` in **Add alert** → **Check** → **See** the parsed rule → **Save alert**. Try `remind me tomorrow at 9am if BTC is below 95k` (parsed by NEAR AI).
 4. **Open Liquidity** (bottom tab). **See** the Liquidity Map: pick any coin and 24H / 48H / 3D / 1W to see the biggest stacks above (possible long target) and below (possible short target).
 5. **Open Markets.** **See** all 179 coins with search and filters (*Spot via NEAR Intents*, *Top gainers*, *Top losers*), and a star to follow any coin.
 5. **Click any coin** (e.g. BTC). **See** the big chart (24H / 7D / 30D) with the signal's stop and target drawn on it, the trade plan, the factor breakdown, and the **liquidity map** with the biggest stacks above and below.
 6. **Click Trade.** On **Leverage**: pick Long/Short and a leverage, enter margin, a Hyperliquid `0x` address and a refund address → **Check funding quote**. **See** NEAR Intents quote USDC straight into a Hyperliquid account. On **Spot**: pay with **USDC on Base** → **Check price** → **See** a live NEAR Intents swap quote. Quotes are dry, so nothing moves. In the demo, deposit addresses are disabled; signed-in users get a real one.
-7. **Open Track record.** **See** every signal as a dot and the real 4h / 24h hit rate.
+7. **Open Track record** (desktop sidebar; on phones: Profile → Track record). **See** when tracking started, how many signals are scored, every long/short call as a dot, and the real 4h / 24h hit rate. It is early: the hit rate becomes meaningful after many more scored signals.
 8. **Open Activity.** **See** the weekly report and a timeline of messages and Trade taps.
 9. **Telegram:** on the dashboard tap **Connect Telegram** → the bot replies "Connected" with its menu. Try **My signals**, **Market check**, `/ask what's the setup on SOL?`.
-10. **Settings:** profile photo and bio, watchlist with per-coin switches (signals / magnets / price alerts), quiet hours, phone alerts, receiving addresses, export or delete your data.
+10. **Profile (Settings):** watchlist with per-coin switches (signals / magnets / price alerts), quiet hours, time zone (auto-detected), phone alerts, receiving addresses, export or delete your data, and **Sign out / Switch account**. In the demo, photo upload and real phone/Telegram delivery are disabled; **Sign in** from the Demo mode banner to use them for real.
 
 ## 10. Architecture
 
