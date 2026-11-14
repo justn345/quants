@@ -17,7 +17,7 @@ export function CopyPlan({ text }: { text: string }) {
   );
 }
 
-export function TradeFlow({ coin, spot, price }: { coin: string; spot: boolean; price: number }) {
+export function TradeFlow({ coin, spot, price, refToken = null }: { coin: string; spot: boolean; price: number; refToken?: string | null }) {
   const [tokens, setTokens] = useState<Tok[]>([]);
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [coinId, setCoinId] = useState("");
@@ -69,7 +69,7 @@ export function TradeFlow({ coin, spot, price }: { coin: string; spot: boolean; 
   const ask = async (dry: boolean) => {
     setBusy(true); setErr("");
     const r = await fetch("/api/trade/quote", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ coin, side, coinAssetId: coinId, payAssetId: payId, amount, recipient, refundTo, dry }) }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
+      body: JSON.stringify({ coin, side, coinAssetId: coinId, payAssetId: payId, amount, recipient, refundTo, dry, ref: refToken ?? undefined }) }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
     setBusy(false);
     if (r.quote) setQuote(r.quote); else setErr(r.error ?? "Quote failed");
   };

@@ -4,11 +4,14 @@ import { adminClient } from "@/lib/supabase/server";
 import { TradeFlow, CopyPlan } from "@/components/TradeFlow";
 import { CoinIcon, SignalChip, fmtUsd, Logo, Disclaimer } from "@/components/ui";
 import { hyperliquidTradeUrl } from "@/lib/trade/oneclick";
+import { readRef } from "@/lib/server/ref";
+import { currentUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function TradePage({ params }: { params: Promise<{ coin: string }> }) {
+export default async function TradePage({ params, searchParams }: { params: Promise<{ coin: string }>; searchParams: Promise<{ r?: string }> }) {
   const { coin: raw } = await params;
+  const ref = (await searchParams).r ?? null;
   const coin = decodeURIComponent(raw);
   if (!/^[A-Za-z0-9]{1,15}$/.test(coin)) notFound();
   const db = adminClient(); // public market data only
@@ -17,6 +20,9 @@ export default async function TradePage({ params }: { params: Promise<{ coin: st
     db.from("latest_signals").select("direction,label,price,entry_low,entry_high,stop,target,reason,created_at").eq("coin", coin).maybeSingle(),
   ]);
   if (!snap) notFound();
+  // Record the Trade click in the user's own history (never blocks the page).
+  const uid = readRef(ref) ?? (await currentUser().catch(() => ({ user: null }))).user?.id ?? null;
+  if (uid) await db.from("activity").insert({ user_id: uid, kind: "trade_click", coin, meta: { from: ref ? "alert" : "app" } }).then(() => undefined, () => undefined);
   const side = sig?.direction === "short" ? "Short" : "Long";
   const plan = sig ? `${coin} ${side} | Entry ${fmtUsd(+sig.entry_low)}-${fmtUsd(+sig.entry_high)} | Stop ${fmtUsd(+sig.stop)} | Target ${fmtUsd(+sig.target)}` : "";
 
@@ -38,7 +44,7 @@ export default async function TradePage({ params }: { params: Promise<{ coin: st
         </>)}
       </section>
 
-      <TradeFlow coin={coin} spot={!!snap.spot_via_intents} price={+snap.price} />
+      <TradeFlow coin={coin} spot={!!snap.spot_via_intents} price={+snap.price} refToken={readRef(ref) ? ref : null} />
 
       <section className="card mt-4 p-5">
         <h2 className="text-lg font-extrabold">Trade with leverage on Hyperliquid</h2>

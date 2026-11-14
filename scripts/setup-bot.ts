@@ -5,6 +5,9 @@ async function main() {
   await tg("setMyCommands", {
     commands: [
       { command: "start", description: "Connect your Quants account" },
+      { command: "menu", description: "Main menu" },
+      { command: "signals", description: "Signals for your coins" },
+      { command: "check", description: "Market check: wait or act?" },
       { command: "alerts", description: "Your active alerts" },
       { command: "watchlist", description: "Coins you follow" },
       { command: "ask", description: "Ask Quants about a coin" },

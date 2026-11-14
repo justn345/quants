@@ -3,7 +3,7 @@ import { adminClient } from "@/lib/supabase/server";
 import { json, siteUrl } from "@/lib/server/guard";
 import { verifyWebhook, isLinkCodeShape, sha256 } from "@/lib/telegram/security";
 import { tg, sendMessage } from "@/lib/telegram/api";
-import { esc, fmtPx, DISCLAIMER } from "@/lib/telegram/format";
+import { esc, fmtPx, DISCLAIMER, menuMarkup, checkinMessage } from "@/lib/telegram/format";
 import { nearChat, sanitizeUserText } from "@/lib/ai/nearai";
 import { findCoin } from "@/lib/alerts/parse";
 
@@ -30,6 +30,14 @@ export async function POST(req: Request) {
   if (u.callback_query) {
     const cq = u.callback_query;
     const chatId = cq.message?.chat.id;
+    const menu = cq.data?.match(/^menu:(signals|alerts|watch|check)$/);
+    if (menu && chatId) {
+      await tg("answerCallbackQuery", { callback_query_id: cq.id }).catch(() => undefined);
+      const { data: p } = await db.from("profiles").select("id").eq("telegram_chat_id", chatId).maybeSingle();
+      if (!p) { await say(chatId, "Link your account first: open Quants and tap \"Connect Telegram\"."); return json({ ok: true }); }
+      await menuReply(db, chatId, p.id, menu[1]);
+      return json({ ok: true });
+    }
     const m = cq.data?.match(/^ack:([0-9a-f-]{36})$/);
     let note = "Done";
     if (m && chatId) {
@@ -63,7 +71,8 @@ export async function POST(req: Request) {
       await db.from("telegram_link_codes").update({ used_at: new Date().toISOString() }).eq("code_hash", hash).is("used_at", null);
       await db.from("profiles").update({ telegram_chat_id: null }).eq("telegram_chat_id", chatId);
       await db.from("profiles").update({ telegram_chat_id: chatId }).eq("id", code.user_id);
-      await say(chatId, "<b>Connected.</b> You'll get alerts here only for the coins and alert types you turned on.\n\nTry /alerts, /watchlist or ask me: <code>/ask what's the setup on SOL?</code>", { parse_mode: "HTML" });
+      await db.from("activity").insert({ user_id: code.user_id, kind: "telegram_linked" });
+      await say(chatId, "<b>Connected.</b> You'll get alerts here only for the coins and alert types you turned on.\n\nAsk me anything, e.g. <code>/ask what's the setup on SOL?</code>", { parse_mode: "HTML", reply_markup: menuMarkup(`${app}/app`) });
       return json({ ok: true });
     }
     await say(chatId, `<b>Quants</b> watches the market for you.\nOpen ${app}/app and tap "Connect Telegram" to link your account.\n\n<i>${DISCLAIMER}</i>`, { parse_mode: "HTML" });
@@ -75,7 +84,13 @@ export async function POST(req: Request) {
     return json({ ok: true });
   }
 
-  if (cmd === "/help") {
+  if (cmd === "/menu" || (cmd === "/start" && !arg)) {
+    await say(chatId, `<b>Quants</b>, your market agent. Pick an option:`, { parse_mode: "HTML", reply_markup: menuMarkup(`${app}/app`) });
+  } else if (cmd === "/check") {
+    await menuReply(db, chatId, prof.id, "check");
+  } else if (cmd === "/signals") {
+    await menuReply(db, chatId, prof.id, "signals");
+  } else if (cmd === "/help") {
     await say(chatId, "<b>Commands</b>\n/alerts – your active alerts\n/watchlist – coins you follow\n/ask – ask about a coin, e.g. <code>/ask SOL setup?</code>\n/settings – notification settings\n\nAlerts come with a <b>Trade</b> button and a <b>Got it</b> button to stop repeats.", { parse_mode: "HTML" });
   } else if (cmd === "/alerts") {
     const { data: al } = await db.from("alerts").select("coin,kind,direction,price,remind_at,status").eq("user_id", prof.id).in("status", ["active", "paused"]).order("created_at", { ascending: false }).limit(20);
@@ -115,4 +130,32 @@ export async function POST(req: Request) {
     await say(chatId, "Unknown command. Try /help.");
   }
   return json({ ok: true });
+}
+
+type DB = ReturnType<typeof adminClient>;
+
+async function menuReply(db: DB, chatId: number, uid: string, what: string) {
+  const app = siteUrl();
+  const { data: wl } = await db.from("watchlist").select("coin").eq("user_id", uid).limit(15);
+  const coins = (wl ?? []).map((w) => w.coin);
+  if (what === "watch") {
+    await say(chatId, `<b>You follow</b>: ${coins.map(esc).join(", ") || "nothing yet"}\nAdd any of 170+ coins: ${app}/app/markets`, { parse_mode: "HTML" });
+    return;
+  }
+  if (what === "alerts") {
+    const { data: al } = await db.from("alerts").select("coin,kind,direction,price,remind_at,status").eq("user_id", uid).in("status", ["active", "paused", "fired"]).order("created_at", { ascending: false }).limit(15);
+    const lines = (al ?? []).map((a) => a.kind === "reminder"
+      ? `• ${esc(a.coin)} reminder ${a.remind_at ? new Date(a.remind_at).toUTCString().slice(5, 22) + " UTC" : ""}${a.status !== "active" ? " (" + a.status + ")" : ""}`
+      : `• ${esc(a.coin)} ${a.direction} ${fmtPx(+a.price)}${a.status !== "active" ? " (" + a.status + ")" : ""}`);
+    await say(chatId, lines.length ? `<b>Your alerts</b>\n${lines.join("\n")}\n\nManage: ${app}/app/alerts` : `No alerts yet. Add one: ${app}/app/alerts`, { parse_mode: "HTML" });
+    return;
+  }
+  const { data: sigs } = coins.length ? await db.from("latest_signals").select("coin,price,label,direction,stop,target").in("coin", coins) : { data: [] };
+  const rows = (sigs ?? []).map((x) => ({ coin: x.coin, price: +x.price, label: x.label, direction: x.direction, stop: +x.stop, target: +x.target }));
+  if (!rows.length) { await say(chatId, `No signals yet for your coins. They update every 15 minutes: ${app}/app/signals`); return; }
+  if (what === "check") { await sendMessage(chatId, checkinMessage(rows, `${app}/app`)).catch(() => undefined); return; }
+  const lines = rows.map((r) => r.direction === "none"
+    ? `• <b>${esc(r.coin)}</b> ${fmtPx(r.price)} · Wait`
+    : `${r.direction === "long" ? "▲" : "▼"} <b>${esc(r.coin)}</b> ${fmtPx(r.price)} · ${esc(r.label)} · stop ${fmtPx(r.stop)} · target ${fmtPx(r.target)}`);
+  await say(chatId, `<b>Your signals</b>\n${lines.join("\n")}\n\n<i>${DISCLAIMER}</i>`, { parse_mode: "HTML" });
 }

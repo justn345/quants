@@ -8,7 +8,8 @@ import { fetchAssetCtxs, fetchBook, fetchCandles } from "@/lib/market/hyperliqui
 import { computeSignal, scoreSignal } from "@/lib/market/signals";
 import { writeReason } from "@/lib/ai/reason";
 import { fetchOneClickTokens, spotMarkets } from "@/lib/trade/oneclick";
-import { magnetMessage, signalMessage } from "@/lib/telegram/format";
+import { checkinMessage, magnetMessage, signalMessage } from "@/lib/telegram/format";
+import { tradeLink } from "@/lib/server/ref";
 import { enqueue } from "@/lib/server/notify";
 import { quietUntil } from "@/lib/alerts/checker";
 
@@ -64,7 +65,8 @@ export async function POST(req: Request) {
       made++;
 
       // Notify followers (only those who follow this coin and turned the type on).
-      const changed = prev && prev.direction !== s.direction && s.direction !== "none";
+      // "changed" covers new setups AND the edge disappearing (a WAIT message).
+      const changed = !!prev && prev.direction !== s.direction;
       const near = [s.factors.magnetAbove, s.factors.magnetBelow].filter(Boolean).sort((a, b) => Math.abs(a!.distancePct) - Math.abs(b!.distancePct))[0];
       const magnetHit = near && Math.abs(near.distancePct) <= 1.0;
       if (changed || magnetHit) {
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
         const ids = (subs ?? []).map((x) => x.user_id);
         const { data: profs } = ids.length ? await db.from("profiles").select("id,time_zone,quiet_start,quiet_end,max_alerts_per_day").in("id", ids) : { data: [] };
         const since = new Date(); since.setUTCHours(0, 0, 0, 0);
-        const tradeUrl = `${siteUrl()}/trade/${encodeURIComponent(coin)}`;
+        const chartUrl = `${siteUrl()}/app/signals?coin=${encodeURIComponent(coin)}`;
         const bucket = Math.floor(Date.now() / (4 * 3600_000));
         for (const sub of subs ?? []) {
           const p = profs?.find((x) => x.id === sub.user_id);
@@ -81,18 +83,39 @@ export async function POST(req: Request) {
             .eq("user_id", sub.user_id).in("kind", ["signal", "magnet"]).gte("created_at", since.toISOString());
           if ((count ?? 0) >= p.max_alerts_per_day) continue; // cap applies to signal/magnet only
           const sendAfter = (quietUntil(new Date(), p) ?? new Date()).toISOString();
+          const tradeUrl = tradeLink(siteUrl(), coin, sub.user_id);
           if (changed && sub.notify_signals) {
-            await enqueue(db, { user_id: sub.user_id, signal_id: ins?.id, kind: "signal", title: `${coin}: ${s.label}`, body: reason.text,
-              payload: signalMessage(s, reason.text, tradeUrl), dedupe_key: `signal:${ins?.id}:${sub.user_id}`, send_after: sendAfter });
+            await enqueue(db, { user_id: sub.user_id, signal_id: ins?.id, kind: "signal", title: s.direction === "none" ? `${coin}: Wait, edge gone` : `${coin}: ${s.label}`, body: reason.text,
+              payload: signalMessage(s, reason.text, tradeUrl, chartUrl), dedupe_key: `signal:${ins?.id}:${sub.user_id}`, send_after: sendAfter });
           }
           if (magnetHit && sub.notify_magnets) {
             await enqueue(db, { user_id: sub.user_id, signal_id: ins?.id, kind: "magnet", title: `${coin} near a liquidation magnet`, body: `Cluster near ${near!.price}`,
-              payload: magnetMessage({ coin, price: s.price, cluster: near!.price, side: near!.side, distancePct: near!.distancePct, tradeUrl }),
+              payload: magnetMessage({ coin, price: s.price, cluster: near!.price, side: near!.side, distancePct: near!.distancePct, tradeUrl, chartUrl }),
               dedupe_key: `magnet:${coin}:${near!.side}:${bucket}:${sub.user_id}`, send_after: sendAfter });
           }
         }
       }
     } catch { /* one coin failing never stops the others */ }
+  }
+
+  // MARKET CHECK every 4 hours: a "wait or act" summary of each user's coins.
+  let checkins = 0;
+  const nowD = new Date();
+  if (nowD.getUTCHours() % 4 === 0 && nowD.getUTCMinutes() < 15) {
+    const { data: users } = await db.from("profiles").select("id").eq("notify_checkins", true).not("telegram_chat_id", "is", null).limit(5000);
+    const { data: latest } = await db.from("latest_signals").select("coin,price,label,direction");
+    const sigMap = new Map((latest ?? []).map((x) => [x.coin, x]));
+    const slot = nowD.toISOString().slice(0, 13);
+    for (const u of users ?? []) {
+      if (Date.now() - t0 > 50_000) break;
+      const { data: w } = await db.from("watchlist").select("coin").eq("user_id", u.id).limit(12);
+      const rows = (w ?? []).map((x) => sigMap.get(x.coin)).filter(Boolean).map((x) => ({ coin: x!.coin, price: +x!.price, label: x!.label, direction: x!.direction }));
+      if (!rows.length) continue;
+      await enqueue(db, { user_id: u.id, kind: "checkin", title: rows.some((r) => r.direction !== "none") ? "Market check: setups on your coins" : "Market check: wait",
+        body: rows.map((r) => `${r.coin} ${r.direction === "none" ? "wait" : r.label}`).join(", "),
+        payload: checkinMessage(rows, `${siteUrl()}/app`), dedupe_key: `checkin:${slot}:${u.id}` });
+      checkins++;
+    }
   }
 
   // Score past signals (4h and 24h) against the candles that followed.
@@ -113,5 +136,5 @@ export async function POST(req: Request) {
     } catch { /* try next cycle */ }
   }
 
-  return json({ ok: true, coins: coins.length, made, aiUsed, scored, ms: Date.now() - t0 });
+  return json({ ok: true, coins: coins.length, made, aiUsed, scored, checkins, ms: Date.now() - t0 });
 }

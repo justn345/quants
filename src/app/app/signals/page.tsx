@@ -3,6 +3,7 @@ import { currentUser } from "@/lib/supabase/server";
 import { CoinIcon, SignalChip, fmtUsd, Disclaimer, Pct } from "@/components/ui";
 import { MagnetGauge } from "@/components/MagnetGauge";
 import { PriceChart } from "@/components/PriceChart";
+import { LiquidityMap } from "@/components/LiquidityMap";
 import type { SignalRow } from "@/lib/server/data";
 
 export default async function SignalsPage({ searchParams }: { searchParams: Promise<{ coin?: string }> }) {
@@ -78,6 +79,14 @@ export default async function SignalsPage({ searchParams }: { searchParams: Prom
           )}
         </aside>
       </div>
+
+      <section className="card p-5 sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div><p className="label">Liquidity map · {coin}</p><h2 className="display text-2xl font-black">Where liquidity is stacked</h2></div>
+          <p className="max-w-md text-sm font-medium text-ink-2">Like a liquidation heatmap: big stacks act as magnets. Set an alert at a stack so you&apos;re ready when price gets there.</p>
+        </div>
+        <div className="mt-4"><LiquidityMap coin={coin} /></div>
+      </section>
 
       {rows.length > 1 && (
         <section className="card overflow-x-auto p-2">

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { clientIp, json, rateLimit } from "@/lib/server/guard";
 import { fetchOneClickTokens, getQuote, isValidAddress, toSpotSymbol, type OneClickToken } from "@/lib/trade/oneclick";
 import { currentUser, adminClient } from "@/lib/supabase/server";
+import { readRef } from "@/lib/server/ref";
 
 let cache: { at: number; tokens: OneClickToken[] } | null = null;
 async function tokens() {
@@ -20,6 +21,7 @@ const Body = z.object({
   recipient: z.string().min(2).max(128),
   refundTo: z.string().min(2).max(128),
   dry: z.boolean().default(true),
+  ref: z.string().max(80).optional(),
 });
 
 export async function GET() {
@@ -33,6 +35,12 @@ export async function POST(req: Request) {
   const p = Body.safeParse(await req.json().catch(() => null));
   if (!p.success) return json({ error: "Check the amount and addresses." }, 400);
   const b = p.data;
+  const db = adminClient();
+  const uid = readRef(b.ref) ?? (await currentUser().catch(() => ({ user: null }))).user?.id ?? null;
+  if (!b.dry && uid) {
+    const { data: prof } = await db.from("profiles").select("is_demo").eq("id", uid).maybeSingle();
+    if (prof?.is_demo) return json({ error: "Demo accounts can check prices but not trade. Sign in with Google or a NEAR wallet to get a real deposit address." }, 403);
+  }
   const list = await tokens();
   const coinTok = list.find((t) => t.assetId === b.coinAssetId);
   const payTok = list.find((t) => t.assetId === b.payAssetId);
@@ -47,9 +55,10 @@ export async function POST(req: Request) {
   if (units === "0") return json({ error: "Amount must be above zero." }, 400);
   try {
     const { quote, correlationId } = await getQuote({ originAsset: from.assetId, destinationAsset: to.assetId, amount: units, recipient: b.recipient.trim(), refundTo: b.refundTo.trim(), dry: b.dry });
+    if (uid) await db.from("activity").insert({ user_id: uid, kind: b.dry ? "quote" : "deposit_address", coin: b.coin, meta: { side: b.side, from: from.symbol + "/" + from.blockchain, to: to.symbol + "/" + to.blockchain, amountIn: quote.amountInFormatted, amountOut: quote.amountOutFormatted } }).then(() => undefined, () => undefined);
     if (!b.dry && quote.depositAddress) {
-      const { user } = await currentUser();
-      if (user) await adminClient().from("trades").insert({
+      const user = uid ? { id: uid } : null;
+      if (user) await db.from("trades").insert({
         user_id: user.id, coin: b.coin, side: b.side, origin_asset: from.assetId, destination_asset: to.assetId, amount_in: units,
         amount_out_expected: quote.amountOut, deposit_address: quote.depositAddress, recipient: b.recipient.trim(), status: "PENDING_DEPOSIT", quote: { ...quote, correlationId },
       });

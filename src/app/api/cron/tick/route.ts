@@ -8,6 +8,7 @@ import { fetchAssetCtxs } from "@/lib/market/hyperliquid";
 import { checkAlerts, type AlertRow, type UserPrefs } from "@/lib/alerts/checker";
 import { priceAlertMessage } from "@/lib/telegram/format";
 import { drainOutbox, enqueue } from "@/lib/server/notify";
+import { tradeLink } from "@/lib/server/ref";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -41,19 +42,14 @@ export async function POST(req: Request) {
     const users = [...new Set(batch.map((a) => a.user_id))];
     const { data: profs } = await db.from("profiles").select("id,time_zone,quiet_start,quiet_end").in("id", users);
     const prefs: Record<string, UserPrefs> = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
-    const coins = [...new Set(batch.map((a) => a.coin))];
-    const { data: sigs } = await db.from("latest_signals").select("coin,label,key_level,entry_low,entry_high,stop,target,reason").in("coin", coins);
-    const sigBy = new Map((sigs ?? []).map((s) => [s.coin, s]));
-
     for (const act of checkAlerts(batch as AlertRow[], prices, prefs, now)) {
       const a = act.alert;
       if (act.type === "expire") { await db.from("alerts").update({ status: "done" }).eq("id", a.id); continue; }
       const sendNumber = a.sent_count + 1;
-      const s = sigBy.get(a.coin);
       const msg = priceAlertMessage({
         coin: a.coin, direction: a.direction, level: a.price, price: act.price, note: a.note, sendNumber,
-        repeatMax: a.repeat_max, alertId: a.id, tradeUrl: `${siteUrl()}/trade/${encodeURIComponent(a.coin)}?a=${a.id}`,
-        signal: s ? { label: s.label, keyLevel: +s.key_level, entryLow: +s.entry_low, entryHigh: +s.entry_high, stop: +s.stop, target: +s.target, reason: s.reason } : null,
+        repeatMax: a.repeat_max, alertId: a.id, tradeUrl: tradeLink(siteUrl(), a.coin, a.user_id, `&a=${a.id}`),
+        chartUrl: `${siteUrl()}/app/signals?coin=${encodeURIComponent(a.coin)}`,
       });
       await enqueue(db, {
         user_id: a.user_id, alert_id: a.id, kind: a.kind === "reminder" ? "reminder" : "price",
