@@ -1,13 +1,34 @@
 "use client";
-import { useState } from "react";
+// Google sign-in. Google blocks sign-in inside in-app browsers (Telegram, Instagram...), so inside
+// Telegram we open the login page in the phone's real browser instead.
+import { useEffect, useState } from "react";
 import { browserClient } from "@/lib/supabase/browser";
+
+type TgWebApp = { initData?: string; openLink?: (url: string) => void };
+const tgApp = () => (typeof window !== "undefined" ? (window as unknown as { Telegram?: { WebApp?: TgWebApp } }).Telegram?.WebApp : undefined);
+
+export function GoogleMark({ className = "h-5 w-5" }: { className?: string }) {
+  // Official multi-colour Google "G".
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden>
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  );
+}
 
 export function GoogleLogin() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [inTelegram, setInTelegram] = useState(false);
+  useEffect(() => { setInTelegram(!!tgApp()?.initData); }, []);
+
   return (
     <div>
       <button className="btn w-full bg-cream text-ink hover:bg-white" disabled={busy} onClick={async () => {
+        if (inTelegram) { tgApp()?.openLink?.(`${location.origin}/login`); return; }
         setBusy(true); setErr("");
         const { error } = await browserClient().auth.signInWithOAuth({
           provider: "google",
@@ -15,9 +36,10 @@ export function GoogleLogin() {
         });
         if (error) { setErr("Google sign-in is not available right now. Try the demo."); setBusy(false); }
       }}>
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.9-5.5 3.9-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12s4.3 9.6 9.6 9.6c5.5 0 9.2-3.9 9.2-9.4 0-.6-.1-1.1-.2-1.6H12z" /></svg>
-        {busy ? "Opening Google…" : "Continue with Google"}
+        <GoogleMark />
+        {busy ? "Opening Google…" : inTelegram ? "Open in browser to use Google" : "Continue with Google"}
       </button>
+      {inTelegram && <p className="mt-1 text-xs font-medium text-mist">Google doesn&apos;t allow sign-in inside Telegram. Use &quot;Continue with Telegram&quot; above, or open your browser.</p>}
       {err && <p role="alert" className="mt-2 text-sm font-semibold text-coral">{err}</p>}
     </div>
   );
