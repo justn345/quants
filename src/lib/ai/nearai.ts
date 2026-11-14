@@ -2,7 +2,7 @@
 // Base URL and model list verified at https://docs.near.ai and GET /v1/models on 2026-11-13.
 export const NEAR_AI_BASE_URL = "https://cloud-api.near.ai/v1";
 // Small, cheap open-weights model for summaries and parsing. Override with NEAR_AI_MODEL.
-export const DEFAULT_MODEL = "z-ai/glm-5.3-flash";
+export const DEFAULT_MODEL = "Qwen/Qwen3.6-35B-A3B-FP8";
 
 export interface ChatMessage { role: "system" | "user" | "assistant"; content: string }
 
@@ -26,6 +26,9 @@ export async function nearChat(
         messages,
         max_tokens: opts.maxTokens ?? 160,
         temperature: 0.2,
+        // Turn off "thinking" so short replies are not cut off (Qwen uses chat_template_kwargs; others reasoning_effort).
+        reasoning_effort: "none",
+        chat_template_kwargs: { enable_thinking: false },
         ...(opts.json ? { response_format: { type: "json_object" } } : {}),
       }),
       signal: ctrl.signal,

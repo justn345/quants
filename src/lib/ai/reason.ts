@@ -4,7 +4,7 @@ import { templateReason, type Signal } from "../market/signals";
 
 const SYSTEM = `You write two short plain-English lines explaining a crypto market signal for a beginner.
 Rules: max 2 sentences, max 220 characters total, no emojis, no hype, no promises, never say "guaranteed".
-Only use the numbers given. Liquidation levels are estimates; say "estimated".`;
+Only use the numbers given and write every price with a $ sign. Liquidation levels are estimates; say "estimated".`;
 
 export async function writeReason(s: Signal, apiKey?: string): Promise<{ text: string; source: "ai" | "template" }> {
   const f = s.factors;

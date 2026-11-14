@@ -4,7 +4,7 @@ Short notes on choices made while building, so you can review them later.
 
 ## 13 Nov 2026
 - **Pasted key was not a NEAR AI key.** It is a NEAR Builders directory (MCP) key; NEAR AI Cloud returned 401. Stored in `.env.local` as `NEAR_BUILDERS_MCP_KEY`. `NEAR_AI_API_KEY` is still needed. The guide's request to create a builder profile was not acted on (not part of the build).
-- **NEAR AI**: base URL `https://cloud-api.near.ai/v1` (from docs.near.ai, checked against `/v1/models`). Model `z-ai/glm-5.3-flash`: small, cheap, open-weights; changeable via `NEAR_AI_MODEL`.
+- **NEAR AI**: base URL `https://cloud-api.near.ai/v1` (from docs.near.ai, checked against `/v1/models`). Model `Qwen/Qwen3.6-35B-A3B-FP8`: small, cheap, open-weights, about 100 tokens per reason; changeable via `NEAR_AI_MODEL`. GLM 5.3 Flash and DeepSeek V4.1 Flash were tested first but kept "thinking" and returned no text within the short limit.
 - **1Click token check**: BTC, ETH, SOL, BNB and USDC are supported (many chains). **HYPE is not**, so the trade page shows "Trade on Hyperliquid" for HYPE.
 - **Signals** are pure maths (trend EMA 9/21 + 4h return, contrarian funding, OI change, order-book walls within 1%, estimated liquidation magnets). AI only writes the 2-line reason; a template sentence is used if AI fails.
 - **Liquidation clusters are estimates**: OI split 50/50 long/short, spread over the last 24h of 15m closes by volume, leverage mix 10x 40%, 25x 30%, 50x 20%, 100x 10%, 0.5% maintenance margin.
