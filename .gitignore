@@ -17,3 +17,7 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Private notes (submission draft contains personal details)
+SUBMISSION.md
+TODO-FEEDBACK.md

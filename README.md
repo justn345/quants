@@ -21,6 +21,7 @@ Retail traders miss moves because they can't watch charts all day. Price-alert a
 | Liquidation magnet alerts | Only for users following that coin, when price is within 1% of an estimated cluster. |
 | Honest track record | Every long/short signal is scored after 4h and 24h (hit target / hit stop / neither). If both are touched in one candle it counts as a stop. The real hit rate is shown, even when low. |
 | Telegram | One-tap deep link with a one-time, 10-minute code. Readable alerts with levels, reason, disclaimer, a **Trade** button (Telegram Mini App) and **Got it**. `/ask` answers questions from stored data via NEAR AI (20/day cap). |
+| Markets | Every Hyperliquid coin (179) with price, 24h change, volume, open interest, search, filters (spot via NEAR Intents, gainers, losers), follow star, and a big chart per coin (24H/7D/30D) with the signal's stop/target drawn on it. |
 | Trade page | Spot buy/sell through **NEAR Intents** (1Click API) to the user's own address; leverage via a Hyperliquid deep link with the signal's side/entry/stop/target ready to copy. |
 | Per-user control | Watchlist with per-coin switches (signals / magnets / price alerts), quiet hours, max signal alerts per day, export data, delete account. |
 

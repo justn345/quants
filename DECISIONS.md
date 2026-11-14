@@ -30,5 +30,16 @@ Short notes on choices made while building, so you can review them later.
 - **Database permissions**: browser users can only edit safe columns (not admin flags, Telegram chat id, or alert send counters).
 - **NEAR payout account** saved as `sillymask4660.near` (from your NEAR Builders dashboard). Confirm before submission.
 
+## 14 Nov 2026: decided while you were busy (please review)
+- **Hosting**: deployed to Vercel production (https://quants-vert.vercel.app) under your "approve it yourself" instruction, because your internet can't reach Hyperliquid's API, so live data only works on Vercel. Nothing pushed to GitHub yet.
+- **Scheduled agent**: Supabase pg_cron calls the app every minute (prices + alerts) and every 15 minutes (signals). The secret is in Supabase Vault.
+- **Google sign-in**: Google Cloud project "My Project 58623" (yours), consent screen "Quants", published "In production" (no review needed for name/email only). The sign-in screen shows the Supabase address instead of "Quants" because a custom domain costs money.
+- **NEAR wallet login** is optional, under Google and Try demo, as you asked.
+- **Telegram**: webhook set to the live app, menu button "Open Quants".
+- **Design**: followed your reference images: dark forest hero cards with lime highlights, soft grey canvas with white floating cards and corner arrow buttons, pill tabs, floating pill navigation on phones, Markets page with all 179 coins, big chart with 24H/7D/30D, dark login card. Subtle glass only on the landing and login.
+- **Cut for time**: the long version of some polish (custom illustrations, candlestick chart). Signals page uses a line chart with stop/target lines.
+- **PostCSS advisory**: tried to force the patched version, but it broke the build; reverted (build-time only, see SECURITY-REPORT.md).
+- **Mistake and fix**: a test command set the live public Supabase key to "x", which broke all logins for about an hour; fixed and re-verified.
+
 ## After the hackathon (not built now)
 - Hyperliquid builder codes would let Quants place leveraged orders inside the app (user signs with their own wallet) and earn a small fee per trade without referral volume.
