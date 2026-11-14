@@ -5,7 +5,7 @@ export function TryDemoButton({ className = "btn btn-primary" }: { className?: s
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   return (
-    <span className="inline-flex flex-col">
+    <span className="flex flex-col">
       <button className={className} disabled={busy} onClick={async () => {
         setBusy(true); setErr("");
         const r = await fetch("/api/demo", { method: "POST" }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
