@@ -1,5 +1,5 @@
 // Hyperliquid public info API (no key needed). One fetch per cycle for everyone, never per user.
-import { COINS, type Coin } from "./coins";
+import type { Coin } from "./coins";
 
 const HL_INFO = "https://api.hyperliquid.xyz/info";
 
@@ -31,24 +31,27 @@ export interface AssetCtx {
   openInterestUsd: number;
   dayVolumeUsd: number;
   maxLeverage: number;
+  szDecimals: number;
 }
 
+/** Every live (not delisted) perp in one call: prices, funding, OI, volume. */
 export async function fetchAssetCtxs(): Promise<Record<Coin, AssetCtx>> {
-  type Meta = { universe: { name: string; maxLeverage: number }[] };
+  type Meta = { universe: { name: string; maxLeverage: number; szDecimals: number; isDelisted?: boolean }[] };
   type Ctx = {
     funding: string; openInterest: string; prevDayPx: string; dayNtlVlm: string;
     markPx: string; midPx: string | null;
   };
   const [meta, ctxs] = await post<[Meta, Ctx[]]>({ type: "metaAndAssetCtxs" });
-  const out = {} as Record<Coin, AssetCtx>;
+  const out: Record<Coin, AssetCtx> = {};
   meta.universe.forEach((u, i) => {
-    if (!(COINS as readonly string[]).includes(u.name)) return;
     const c = ctxs[i];
+    if (u.isDelisted || !c) return;
     const mark = Number(c.markPx);
+    if (!(mark > 0)) return;
     const prev = Number(c.prevDayPx);
     const oi = Number(c.openInterest);
-    out[u.name as Coin] = {
-      coin: u.name as Coin,
+    out[u.name] = {
+      coin: u.name,
       markPx: mark,
       midPx: c.midPx ? Number(c.midPx) : mark,
       prevDayPx: prev,
@@ -58,9 +61,18 @@ export async function fetchAssetCtxs(): Promise<Record<Coin, AssetCtx>> {
       openInterestUsd: oi * mark,
       dayVolumeUsd: Number(c.dayNtlVlm),
       maxLeverage: u.maxLeverage,
+      szDecimals: u.szDecimals,
     };
   });
-  for (const coin of COINS) if (!out[coin]) throw new Error(`Missing ${coin} in Hyperliquid meta`);
+  if (!out.BTC) throw new Error("Hyperliquid meta looks wrong (no BTC)");
+  return out;
+}
+
+/** All mid prices in one light call (used by the every-minute alert checker). */
+export async function fetchAllMids(): Promise<Record<Coin, number>> {
+  const raw = await post<Record<string, string>>({ type: "allMids" });
+  const out: Record<Coin, number> = {};
+  for (const [k, v] of Object.entries(raw)) if (!k.startsWith("@")) out[k] = Number(v); // "@123" = spot pairs
   return out;
 }
 

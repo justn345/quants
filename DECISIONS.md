@@ -13,5 +13,11 @@ Short notes on choices made while building, so you can review them later.
 - **Missing inputs**: `SECURITY.md`, `design-refs/` and `quants_bot_logo.png` were not in the folder at start. UI design waits for the reference images.
 - **Next.js 15** (stable, App Router) + Tailwind 4 + Zod. Tools added: `tsx` (via npx) for running test scripts.
 
+- **All coins, not just 5** (your request): every live Hyperliquid perp (179 today) gets live prices, signals and price alerts. BTC, ETH, SOL, BNB and HYPE stay "featured": defaults for new users, the intro orbit, and an AI reason every cycle.
+- **AI cost stays flat**: AI reasons are written for the 5 featured coins plus the most-followed coins, capped per cycle (config, default 15 coins → max 1,440 small calls/day). Other coins get the template reason. Price alerts are maths only for every coin.
+- **NEAR first for trading**: 46 of the 179 coins are spot-tradable through NEAR Intents (live check of the 1Click token list). Plan for the rest: open a leveraged trade on Hyperliquid, funded through NEAR Intents (1Click supports USDC into Hyperliquid), so money still moves through NEAR.
+- **Watch-out**: Hyperliquid "k" coins (kPEPE, kSHIB) are priced per 1,000 tokens; the trade page must convert when quoting the real token.
+- **Signals for many coins**: computed each cycle only for featured + followed coins, to stay inside Hyperliquid's rate limits.
+
 ## After the hackathon (not built now)
 - Hyperliquid builder codes would let Quants place leveraged orders inside the app (user signs with their own wallet) and earn a small fee per trade without referral volume.

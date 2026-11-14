@@ -127,7 +127,7 @@ export function computeSignal(coin: Coin, ctx: AssetCtx, candles15m: Candle[], b
     keyLevel = (above && below ? (Math.abs(above.distancePct) < Math.abs(below.distancePct) ? above : below) : above ?? below)?.price ?? price;
   }
 
-  const r = (x: number) => roundPx(coin, x);
+  const r = (x: number) => roundPx(x, ctx.szDecimals);
   return {
     coin, direction,
     label: direction === "long" ? "Leaning long" : direction === "short" ? "Leaning short" : "No clear edge",
@@ -164,7 +164,7 @@ export function templateReason(s: Signal): string {
   const trendTxt = f.trend > 0.3 ? "Short-term trend is up" : f.trend < -0.3 ? "Short-term trend is down" : "Trend is flat";
   const fundTxt = f.funding < -0.3 ? "longs are paying high funding" : f.funding > 0.3 ? "shorts are crowded" : "funding is normal";
   const mag = f.magnetAbove && (!f.magnetBelow || f.magnetAbove.notionalUsd >= f.magnetBelow.notionalUsd)
-    ? `Estimated short liquidations sit near $${roundPx(s.coin, f.magnetAbove.price)}.`
-    : f.magnetBelow ? `Estimated long liquidations sit near $${roundPx(s.coin, f.magnetBelow.price)}.` : "No big liquidation cluster nearby.";
+    ? `Estimated short liquidations sit near $${roundPx(f.magnetAbove.price)}.`
+    : f.magnetBelow ? `Estimated long liquidations sit near $${roundPx(f.magnetBelow.price)}.` : "No big liquidation cluster nearby.";
   return `${trendTxt} and ${fundTxt}. ${mag}`;
 }
