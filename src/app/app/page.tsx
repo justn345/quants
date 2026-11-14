@@ -7,6 +7,8 @@ import { GetAlertsCard } from "@/components/GetAlertsCard";
 import { MagnetGauge } from "@/components/MagnetGauge";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { Spark } from "@/components/Spark";
+import { WaitLevels } from "@/components/WaitLevels";
+import { tidyPrices } from "@/lib/format";
 
 function Corner({ href, label, dark = false }: { href: string; label: string; dark?: boolean }) {
   return (
@@ -117,12 +119,13 @@ export default async function Dashboard() {
                   <Corner href={`/app/signals?coin=${encodeURIComponent(s.coin)}`} label={`${s.coin} signal detail`} />
                 </div>
                 <div className="mt-3"><SignalChip direction={s.direction} label={s.direction === "none" ? "Wait · no clear edge" : s.label} /></div>
-                <dl className="num mt-3 grid grid-cols-3 gap-2 text-sm">
+                <div className="mt-3">{s.direction === "none" ? <WaitLevels keyLevel={+s.key_level} factors={s.factors} /> : (
+                <dl className="num grid grid-cols-3 gap-2 text-sm">
                   <div className="rounded-xl bg-paper p-2"><dt className="label">Entry</dt><dd className="truncate font-bold">{fmtUsd(+s.entry_low)}</dd></div>
                   <div className="rounded-xl bg-paper p-2"><dt className="label">Stop</dt><dd className="truncate font-bold text-coral">{fmtUsd(+s.stop)}</dd></div>
                   <div className="rounded-xl bg-paper p-2"><dt className="label">Target</dt><dd className="truncate font-bold text-brand">{fmtUsd(+s.target)}</dd></div>
-                </dl>
-                <p className="mt-3 text-sm font-medium text-ink">{s.reason}</p>
+                </dl>)}</div>
+                <p className="mt-3 text-sm font-medium text-ink">{tidyPrices(s.reason, +s.price)}</p>
                 <MagnetGauge price={+s.price} factors={s.factors} />
                 <div className="mt-4 flex items-center justify-between gap-2">
                   <span className="text-xs font-semibold text-ink-2">Updated {ago(s.created_at)}</span>

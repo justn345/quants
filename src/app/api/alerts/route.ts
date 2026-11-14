@@ -36,6 +36,11 @@ export async function POST(req: Request) {
   }
 
   if (b.action === "create") {
+    const { data: prof } = await adminClient().from("profiles").select("is_demo").eq("id", user.id).maybeSingle();
+    if (prof?.is_demo) {
+      const { count } = await sb.from("alerts").select("id", { count: "exact", head: true }).eq("user_id", user.id);
+      if ((count ?? 0) >= 10) return json({ error: "Demo accounts can have up to 10 alerts. Sign in to add more." }, 403);
+    }
     const prices = await universePrices();
     const rule = alertRuleSchema(new Set(Object.keys(prices))).safeParse(b.rule);
     if (!rule.success) return json({ error: "Invalid alert" }, 400);

@@ -77,15 +77,19 @@ export function AppShell({ name, demo, avatar = null, admin = false, tz = "UTC",
       <div className="pb-28 lg:pb-0">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 bg-[#edf1ea] px-4 py-3 sm:px-8">
           <Link href="/app" className="lg:hidden"><Logo size={30} /></Link>
-          <nav className="hidden items-center gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-line lg:flex">
-            {NAV.slice(0, 6).map(({ href, label }) => <Link key={href} href={href} className={`pill-tab flex items-center ${active(href) ? "on" : "!shadow-none"}`}>{label}</Link>)}
-          </nav>
+          <span className="hidden lg:block" aria-hidden />
           <div className="flex items-center gap-2">
             {demo && <span className="chip bg-lime text-night">Demo</span>}
             <Link href="/app/activity" aria-label="Activity and notifications" className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-line"><BellRing className="h-[18px] w-[18px]" /></Link>
             <Link href="/app/settings" aria-label="Profile and settings" className="overflow-hidden rounded-full ring-2 ring-white"><Avatar size={40} /></Link>
           </div>
         </header>
+        {demo && (
+          <div className="mx-4 mb-2 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-night px-4 py-3 text-cream sm:mx-8">
+            <p className="text-sm font-bold"><span className="text-signal">Demo mode:</span> nothing real happens. Sign in to use Quants AI for real.</p>
+            <form action="/auth/signout" method="post"><button name="switch" value="1" className="btn btn-primary h-9 px-4 text-sm">Sign in</button></form>
+          </div>
+        )}
         <main className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-8">{children}</main>
       </div>
 

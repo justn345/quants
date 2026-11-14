@@ -48,10 +48,11 @@ export async function drainOutbox(db: SupabaseClient, budgetMs = 40_000) {
 
   const userIds = [...new Set(rows.map((r) => r.user_id))];
   const [{ data: profs }, { data: subs }] = await Promise.all([
-    db.from("profiles").select("id, telegram_chat_id").in("id", userIds),
+    db.from("profiles").select("id, telegram_chat_id, is_demo").in("id", userIds),
     db.from("push_subscriptions").select("id,user_id,endpoint,p256dh,auth").in("user_id", userIds),
   ]);
   const chat = new Map((profs ?? []).map((p) => [p.id, p.telegram_chat_id as number | null]));
+  const demo = new Set((profs ?? []).filter((p) => p.is_demo).map((p) => p.id));
   const subsBy = new Map<string, Sub[]>();
   for (const s of (subs ?? []) as Sub[]) subsBy.set(s.user_id, [...(subsBy.get(s.user_id) ?? []), s]);
 
@@ -59,6 +60,7 @@ export async function drainOutbox(db: SupabaseClient, budgetMs = 40_000) {
     if (Date.now() - start > budgetMs) break;
     const { data: claimed } = await db.from("notifications").update({ status: "sending" }).eq("id", r.id).eq("status", "queued").select("id");
     if (!claimed?.length) continue;
+    if (demo.has(r.user_id)) { await db.from("notifications").update({ status: "skipped" }).eq("id", r.id); skipped++; continue; } // sandbox
 
     // Phone/desktop push (once per notification, even if Telegram is retried later).
     let pushed = !!r.pushed_at;

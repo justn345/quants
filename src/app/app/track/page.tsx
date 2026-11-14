@@ -6,6 +6,13 @@ export default async function TrackPage() {
   const { data } = await sb.from("signals").select("id,coin,direction,label,price,stop,target,created_at,outcome_4h,outcome_24h")
     .neq("direction", "none").order("created_at", { ascending: false }).limit(300);
   const rows = data ?? [];
+  const [{ data: first }, { count: allCount }] = await Promise.all([
+    sb.from("signals").select("created_at").order("created_at").limit(1).maybeSingle(),
+    sb.from("signals").select("id", { count: "exact", head: true }),
+  ]);
+  const since = first?.created_at ? new Date(first.created_at) : null;
+  const scored4 = rows.filter((r) => r.outcome_4h && r.outcome_4h !== "no_trade").length;
+  const scored24 = rows.filter((r) => r.outcome_24h && r.outcome_24h !== "no_trade").length;
   const scored = (k: "outcome_4h" | "outcome_24h") => rows.filter((r) => r[k] && r[k] !== "no_trade");
   const rate = (k: "outcome_4h" | "outcome_24h") => { const s = scored(k); return s.length ? Math.round((s.filter((r) => r[k] === "hit_target").length / s.length) * 100) : null; };
   const cell = (o: string | null) => o === "hit_target" ? "bg-brand" : o === "hit_stop" ? "bg-coral" : o === "neither" ? "bg-mist" : "bg-white ring-1 ring-line";
@@ -14,6 +21,13 @@ export default async function TrackPage() {
       <div><p className="label">Track record</p><h1 className="display text-3xl font-black sm:text-4xl">Public track record</h1>
         <p className="mt-1 text-sm font-bold text-brand">All Quants AI signals across every coin, the same for every user. Not your personal history: that is on the Activity page.</p>
         <p className="mt-2 font-medium text-ink-2">Each long/short signal is checked after 4h and 24h: did price hit the target or the stop first? If both happened in the same 15-minute candle, we count it as a stop.</p></div>
+      <section className="card flex flex-wrap gap-x-8 gap-y-2 p-4 text-sm font-semibold">
+        <span><span className="label">Tracking started</span><br />{since ? since.toLocaleString([], { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–"}</span>
+        <span><span className="label">Readings logged</span><br />{allCount ?? 0} (incl. &quot;wait&quot;)</span>
+        <span><span className="label">Long/short calls</span><br />{rows.length}</span>
+        <span><span className="label">Scored so far</span><br />{scored4} after 4h · {scored24} after 24h</span>
+        <p className="w-full text-xs font-bold text-coral">Early days: the hit rate becomes meaningful after many more scored signals (roughly 50+). Numbers are shown as they are, even when low.</p>
+      </section>
       <div className="grid gap-4 sm:grid-cols-3">
         {[["Hit rate after 4h", rate("outcome_4h"), scored("outcome_4h").length], ["Hit rate after 24h", rate("outcome_24h"), scored("outcome_24h").length], ["Signals logged", rows.length, null]].map(([l, v, n]) => (
           <div key={l as string} className="card p-5"><p className="label">{l}</p><p className="display num mt-2 text-4xl font-black">{v == null ? "–" : l === "Signals logged" ? v : `${v}%`}</p>{n != null && <p className="text-sm font-semibold text-ink-2">{n ? `${n} scored` : "Scoring starts 4h after the first signal"}</p>}</div>

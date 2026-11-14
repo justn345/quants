@@ -9,11 +9,8 @@ export function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function fmtPx(p: number): string {
-  if (!isFinite(p)) return "-";
-  const d = p >= 1000 ? 0 : p >= 1 ? 2 : p >= 0.01 ? 4 : 6;
-  return "$" + p.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
-}
+import { fmtPrice } from "../format";
+export const fmtPx = (p: number) => fmtPrice(p);
 
 export interface InlineButton { text: string; callback_data?: string; web_app?: { url: string }; url?: string }
 export interface TgMessage { text: string; reply_markup?: { inline_keyboard: InlineButton[][] } }

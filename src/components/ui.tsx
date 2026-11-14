@@ -4,10 +4,12 @@ export const DISCLAIMER = "Not financial advice. Do your own research. Signals a
 export function Logo({ size = 32, light = false }: { size?: number; light?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
-        <rect width="64" height="64" rx="16" fill={light ? "#E3EED4" : "#0F2A1D"} />
-        <circle cx="31" cy="31" r="15" fill="none" stroke={light ? "#007D10" : "#2EE59D"} strokeWidth="7" />
-        <path d="M36 37 L48 49" stroke={light ? "#007D10" : "#2EE59D"} strokeWidth="7" strokeLinecap="round" />
+      <svg width={size} height={size} viewBox="0 0 512 512" aria-hidden className={light ? "rounded-[22%] ring-1 ring-forest" : "rounded-[22%]"}>
+        <rect width="512" height="512" rx="112" fill="#0B1F17" />
+        <circle cx="246" cy="246" r="132" fill="none" stroke="#F2F0E6" strokeWidth="44" />
+        <path d="M296 296 L398 398" stroke="#F2F0E6" strokeWidth="44" />
+        <path d="M172 296 L232 236 L264 268 L318 214" fill="none" stroke="#2EE59D" strokeWidth="28" />
+        <path d="M282 198 L330 198 L330 246" fill="none" stroke="#2EE59D" strokeWidth="28" />
       </svg>
       <span className="display text-xl font-black tracking-tight">QUANTS<span className="text-signal"> AI</span></span>
     </span>
@@ -16,11 +18,8 @@ export function Logo({ size = 32, light = false }: { size?: number; light?: bool
 
 export { CoinIcon } from "./CoinIcon";
 
-export function fmtUsd(p: number | null | undefined): string {
-  if (p == null || !isFinite(p)) return "–";
-  const d = p >= 1000 ? 0 : p >= 1 ? 2 : p >= 0.01 ? 4 : 6;
-  return "$" + p.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
-}
+import { fmtPrice } from "@/lib/format";
+export const fmtUsd = fmtPrice;
 
 export function Pct({ v }: { v: number | null | undefined }) {
   if (v == null || !isFinite(v)) return <span>–</span>;

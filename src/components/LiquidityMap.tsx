@@ -20,12 +20,15 @@ export function LiquidityMap({ coin, range = "48h", rows = 10 }: { coin: string;
 
   if (err) return <p className="text-sm font-semibold text-ink-2">Liquidity map unavailable right now.</p>;
   if (!d) return <div className="h-64 animate-pulse rounded-2xl bg-paper" aria-label="Loading liquidity map" />;
-  const max = Math.max(...d.levels.map((l) => l.usd), 1);
   const above = d.levels.filter((l) => l.price > d.price).slice(-rows);
   const below = d.levels.filter((l) => l.price < d.price).slice(0, rows);
+  // Summary comes from exactly the bars shown, so the numbers always match the list.
+  const top = (xs: L[]) => xs.reduce<L | null>((m, l) => (!m || l.usd > m.usd ? l : m), null);
+  const sAbove = top(above), sBelow = top(below);
+  const max = Math.max(...above.map((l) => l.usd), ...below.map((l) => l.usd), 1);
   const Row = ({ l }: { l: L }) => {
     const w = Math.max(3, (l.usd / max) * 100);
-    const strong = l === d.strongestAbove || l === d.strongestBelow || (d.strongestAbove && l.price === d.strongestAbove.price) || (d.strongestBelow && l.price === d.strongestBelow.price);
+    const strong = (sAbove && l.price === sAbove.price) || (sBelow && l.price === sBelow.price);
     return (
       <div className="grid grid-cols-[86px_1fr_70px] items-center gap-2 text-xs">
         <span className="num text-right font-bold">{fmtUsd(l.price)}</span>
@@ -40,8 +43,8 @@ export function LiquidityMap({ coin, range = "48h", rows = 10 }: { coin: string;
   return (
     <div>
       <div className="grid gap-2 sm:grid-cols-2">
-        {d.strongestAbove && <div className="rounded-2xl bg-[#fbe1dc] p-3"><p className="label text-[#8f2a1b]">Biggest stack above</p><p className="num font-extrabold">{fmtUsd(d.strongestAbove.price)} <span className="text-sm">(+{d.strongestAbove.distancePct.toFixed(1)}%)</span></p><p className="text-xs font-semibold">Short liquidations ≈ {big(d.strongestAbove.usd)}: price may get pulled up to it.</p></div>}
-        {d.strongestBelow && <div className="rounded-2xl bg-[#d6f9ea] p-3"><p className="label text-[#04563a]">Biggest stack below</p><p className="num font-extrabold">{fmtUsd(d.strongestBelow.price)} <span className="text-sm">({d.strongestBelow.distancePct.toFixed(1)}%)</span></p><p className="text-xs font-semibold">Long liquidations ≈ {big(d.strongestBelow.usd)}: a sweep could wick down here.</p></div>}
+        {sAbove && <div className="rounded-2xl bg-[#fbe1dc] p-3"><p className="label text-[#8f2a1b]">Biggest stack above</p><p className="num font-extrabold">{fmtUsd(sAbove.price)} <span className="text-sm">(+{sAbove.distancePct.toFixed(1)}%)</span></p><p className="text-xs font-semibold">Short liquidations ≈ {big(sAbove.usd)}: price may get pulled up to it.</p></div>}
+        {sBelow && <div className="rounded-2xl bg-[#d6f9ea] p-3"><p className="label text-[#04563a]">Biggest stack below</p><p className="num font-extrabold">{fmtUsd(sBelow.price)} <span className="text-sm">({sBelow.distancePct.toFixed(1)}%)</span></p><p className="text-xs font-semibold">Long liquidations ≈ {big(sBelow.usd)}: a sweep could wick down here.</p></div>}
       </div>
       <div className="mt-4 space-y-1.5">
         {above.map((l) => <Row key={`a${l.price}`} l={l} />)}

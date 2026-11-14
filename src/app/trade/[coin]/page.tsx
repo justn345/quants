@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase/server";
 import { TradeTabs } from "@/components/TradeTabs";
+import { WaitLevels } from "@/components/WaitLevels";
+import { tidyPrices } from "@/lib/format";
 import { CoinIcon, SignalChip, fmtUsd, Logo, Disclaimer } from "@/components/ui";
 import { hyperliquidTradeUrl } from "@/lib/trade/oneclick";
 import { readRef } from "@/lib/server/ref";
@@ -17,7 +19,7 @@ export default async function TradePage({ params, searchParams }: { params: Prom
   const db = adminClient(); // public market data only
   const [{ data: snap }, { data: sig }] = await Promise.all([
     db.from("market_snapshots").select("price,change_24h_pct,spot_via_intents,max_leverage").eq("coin", coin).maybeSingle(),
-    db.from("latest_signals").select("direction,label,price,entry_low,entry_high,stop,target,reason,created_at").eq("coin", coin).maybeSingle(),
+    db.from("latest_signals").select("direction,label,price,key_level,entry_low,entry_high,stop,target,reason,created_at").eq("coin", coin).maybeSingle(),
   ]);
   if (!snap) notFound();
   // Record the Trade click in the user's own history (never blocks the page).
@@ -32,19 +34,23 @@ export default async function TradePage({ params, searchParams }: { params: Prom
           <div className="flex items-center gap-3"><CoinIcon coin={coin} size={44} /><div><h1 className="display text-2xl font-black">{coin}</h1><p className="num font-semibold text-ink-2">{fmtUsd(+snap.price)}</p></div></div>
           {sig && <SignalChip direction={sig.direction} label={sig.label} />}
         </div>
-        {sig && (<>
+        {sig && sig.direction === "none" && (<>
+          <div className="mt-4"><WaitLevels keyLevel={+sig.key_level} /></div>
+          <p className="mt-3 text-sm font-medium">{tidyPrices(sig.reason, +sig.price)}</p>
+        </>)}
+        {sig && sig.direction !== "none" && (<>
           <dl className="num mt-4 grid grid-cols-3 gap-2 text-sm">
             <div className="rounded-xl bg-paper p-2"><dt className="label">Entry</dt><dd className="font-bold">{fmtUsd(+sig.entry_low)}</dd></div>
             <div className="rounded-xl bg-paper p-2"><dt className="label">Stop</dt><dd className="font-bold text-coral">{fmtUsd(+sig.stop)}</dd></div>
             <div className="rounded-xl bg-paper p-2"><dt className="label">Target</dt><dd className="font-bold text-brand">{fmtUsd(+sig.target)}</dd></div>
           </dl>
-          <p className="mt-3 text-sm font-medium">{sig.reason}</p>
+          <p className="mt-3 text-sm font-medium">{tidyPrices(sig.reason, +sig.price)}</p>
         </>)}
       </section>
 
       <TradeTabs coin={coin} spot={!!snap.spot_via_intents} price={+snap.price} maxLev={snap.max_leverage ?? 10} hlUrl={hyperliquidTradeUrl(coin)}
         refToken={readRef(ref) ? ref : null}
-        sig={sig ? { direction: sig.direction, entryLow: +sig.entry_low, entryHigh: +sig.entry_high, stop: +sig.stop, target: +sig.target } : null} />
+        sig={sig && sig.direction !== "none" ? { direction: sig.direction, entryLow: +sig.entry_low, entryHigh: +sig.entry_high, stop: +sig.stop, target: +sig.target } : null} />
       <div className="mt-4"><Disclaimer /></div>
     </main>
   );

@@ -33,11 +33,11 @@ export default async function ActivityPage() {
 
   type Item = { id: string; kind: string; title: string; sub: string; at: string; coin?: string | null };
   const items: Item[] = [
-    ...(notes ?? []).map((n) => ({ id: `n${n.id}`, kind: n.kind, title: n.title, sub: `${n.status === "sent" ? "Delivered on Telegram" : n.status === "skipped" ? "Shown here (Telegram not connected)" : n.status === "queued" ? "Waiting (quiet hours)" : n.status}`, at: n.created_at })),
+    ...(notes ?? []).map((n) => ({ id: `n${n.id}`, kind: n.kind, title: n.title, sub: `${n.title.startsWith("Sample:") ? "Demo sample, nothing was sent" : n.status === "sent" ? "Delivered on Telegram" : n.status === "skipped" ? "Shown here only" : n.status === "queued" ? "Waiting (quiet hours)" : n.status}`, at: n.created_at })),
     ...(acts ?? []).map((a) => {
       const m = (a.meta ?? {}) as Record<string, string>;
       const sub = a.kind === "quote" || a.kind === "deposit_address" ? `${m.side ?? ""} ${m.amountIn ?? ""} ${m.from ?? ""} → ${m.amountOut ?? ""} ${m.to ?? ""}`.trim() : a.kind === "trade_click" ? (m.from === "alert" ? "From an alert" : "From the app") : "";
-      return { id: `a${a.id}`, kind: a.kind, title: `${LABEL[a.kind] ?? a.kind}${a.coin ? ` · ${a.coin}` : ""}`, sub, at: a.created_at, coin: a.coin };
+      return { id: `a${a.id}`, kind: a.kind, title: `${(a.meta as Record<string, unknown>)?.sample ? "Sample: " : ""}${LABEL[a.kind] ?? a.kind}${a.coin ? ` · ${a.coin}` : ""}`, sub, at: a.created_at, coin: a.coin };
     }),
   ].sort((x, y) => (x.at < y.at ? 1 : -1)).slice(0, 120);
 

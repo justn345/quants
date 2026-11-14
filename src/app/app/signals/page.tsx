@@ -4,6 +4,8 @@ import { CoinIcon, SignalChip, fmtUsd, Disclaimer, Pct } from "@/components/ui";
 import { MagnetGauge } from "@/components/MagnetGauge";
 import { PriceChart } from "@/components/PriceChart";
 import { LiquidityMap } from "@/components/LiquidityMap";
+import { WaitLevels } from "@/components/WaitLevels";
+import { tidyPrices } from "@/lib/format";
 import type { SignalRow } from "@/lib/server/data";
 
 export default async function SignalsPage({ searchParams }: { searchParams: Promise<{ coin?: string }> }) {
@@ -51,13 +53,18 @@ export default async function SignalsPage({ searchParams }: { searchParams: Prom
         <aside className="space-y-4">
           <section className="card p-5">
             <h2 className="text-lg font-extrabold">Trade plan</h2>
-            {s ? (<>
+            {s && s.direction === "none" ? (<>
+              <div className="mt-3"><WaitLevels keyLevel={+s.key_level} factors={s.factors} /></div>
+              <p className="mt-3 text-sm font-medium">{tidyPrices(s.reason, +s.price)}</p>
+              <p className="mt-2 text-xs font-semibold text-ink-2">{s.reason_source === "ai" ? "Reason written by NEAR AI" : "Template reason"} · {new Date(s.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+              <MagnetGauge price={+s.price} factors={s.factors} />
+            </>) : s ? (<>
               <dl className="num mt-3 grid grid-cols-2 gap-2 text-sm">
                 {[["Key level", fmtUsd(+s.key_level), ""], ["Entry", `${fmtUsd(+s.entry_low)}–${fmtUsd(+s.entry_high)}`, ""], ["Stop", fmtUsd(+s.stop), "text-coral"], ["Target", fmtUsd(+s.target), "text-brand"]].map(([l, v, c]) => (
                   <div key={l} className="rounded-xl bg-paper p-2.5"><dt className="label">{l}</dt><dd className={`mt-0.5 font-extrabold ${c}`}>{v}</dd></div>
                 ))}
               </dl>
-              <p className="mt-3 text-sm font-medium">{s.reason}</p>
+              <p className="mt-3 text-sm font-medium">{tidyPrices(s.reason, +s.price)}</p>
               <p className="mt-2 text-xs font-semibold text-ink-2">{s.reason_source === "ai" ? "Reason written by NEAR AI" : "Template reason"} · {new Date(s.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
               <MagnetGauge price={+s.price} factors={s.factors} />
             </>) : <p className="mt-2 text-sm font-medium text-ink-2">Signals are computed every 15 minutes for coins people follow. Follow {coin} on the Markets page to start getting them.</p>}

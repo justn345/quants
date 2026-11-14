@@ -15,12 +15,14 @@ export function Landing() {
   const [progress, setProgress] = useState(5);
   const [coins, setCoins] = useState<Snap[]>([]);
   const [total, setTotal] = useState(0);
+  type LiveSig = { coin: string; direction: string; label: string; price: number; key_level: number; entry_low: number; entry_high: number; stop: number; target: number; reason: string };
+  const [sigs, setSigs] = useState<LiveSig[]>([]);
 
   useEffect(() => {
     let p = 5;
     const tick = setInterval(() => { p = Math.min(90, p + 7); setProgress(p); }, 120);
     fetch("/api/prices").then((r) => r.json()).then((j) => {
-      setCoins(j.coins ?? []); setTotal((j.coins ?? []).length);
+      setCoins(j.coins ?? []); setTotal((j.coins ?? []).length); setSigs(j.signals ?? []);
     }).catch(() => {}).finally(() => { clearInterval(tick); setProgress(100); });
     const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.classList.add("in")), { threshold: 0.15 });
     document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
@@ -29,7 +31,11 @@ export function Landing() {
 
   const strip = STRIP.map((c) => coins.find((x) => x.coin === c)).filter(Boolean) as Snap[];
   const hype = coins.find((x) => x.coin === "HYPE");
-  const lvl = hype ? +(hype.price * 0.99).toPrecision(4) : 25.07;
+  // The hero alert mirrors the LIVE HYPE signal, so it can never contradict live data.
+  const live = sigs.find((x) => x.coin === "HYPE");
+  const dir = live?.direction ?? "none";
+  const chipCls = dir === "long" ? "chip-long" : dir === "short" ? "chip-short" : "chip bg-forest text-cream";
+  const chipTxt = dir === "long" ? "▲ Leaning long" : dir === "short" ? "▼ Leaning short" : "● Wait";
 
   return (
     <>
@@ -64,14 +70,15 @@ export function Landing() {
               <p className="display num mt-2 text-2xl font-black">{fmtUsd(hype?.price)}</p>
               <div className="mt-1"><Spark coin="HYPE" group={STRIP} width={190} height={34} dark /></div>
             </div>
-            {/* Main alert card (subtle glass, landing only) */}
+            {/* Main alert card: the live Quants AI signal for HYPE (or a labelled example before data loads) */}
             <div className="glass relative z-20 p-5 sm:p-6 lg:absolute lg:right-0 lg:top-24 lg:w-[400px]">
               <div className="flex items-center justify-between">
-                <span className="label flex items-center gap-2 text-mist"><span className="h-2 w-2 rounded-full bg-signal" />Quants · Telegram alert</span><span className="chip chip-long">▲ Leaning long</span>
+                <span className="label flex items-center gap-2 text-mist">{live ? "Live · Quants AI signal" : "Example alert"}</span><span className={`chip ${chipCls}`}>{chipTxt}</span>
               </div>
-              <p className="display mt-4 text-2xl font-extrabold">HYPE is above {fmtUsd(lvl)}</p>
-              <p className="num mt-1 text-sm font-semibold text-mist">Now {fmtUsd(hype?.price)} · Stop {fmtUsd(lvl * 0.975)} · Target {fmtUsd(lvl * 1.04)}</p>
-              <p className="mt-3 text-sm text-cream">Trend is up and estimated short liquidations sit just above. Reason written by NEAR AI.</p>
+              <p className="display mt-4 text-2xl font-extrabold">{live ? (dir === "none" ? "HYPE: wait, no clear edge" : `HYPE ${live.label.toLowerCase()}`) : "HYPE alert"}</p>
+              {live && dir !== "none" && <p className="num mt-1 text-sm font-semibold text-mist">Now {fmtUsd(hype?.price ?? live.price)} · Stop {fmtUsd(+live.stop)} · Target {fmtUsd(+live.target)}</p>}
+              {live && dir === "none" && <p className="num mt-1 text-sm font-semibold text-mist">Now {fmtUsd(hype?.price ?? live.price)} · Key level {fmtUsd(+live.key_level)}</p>}
+              <p className="mt-3 text-sm text-cream">{live ? live.reason : "Clear levels and a plain-English reason written by NEAR AI."}</p>
               <div className="mt-5 grid grid-cols-2 gap-2">
                 <span className="btn btn-primary">Trade</span><span className="btn btn-ghost text-cream">Got it</span>
               </div>
