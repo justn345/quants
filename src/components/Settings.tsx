@@ -92,6 +92,15 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
       </section>
 
       <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
+        <div><h2 className="text-lg font-extrabold">Account</h2><p className="text-sm font-medium text-ink-2">Sign out of this device, or sign in with a different account.</p></div>
+        <form action="/auth/signout" method="post" className="flex flex-wrap gap-2">
+          <input type="hidden" name="next" value="/login" />
+          <button className="btn btn-light h-11 px-5" name="switch" value="1">Switch account</button>
+          <button className="btn btn-dark h-11 px-5">Sign out</button>
+        </form>
+      </section>
+
+      <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
         <div><h2 className="text-lg font-extrabold">Your data</h2><p className="text-sm font-medium text-ink-2">Download everything we store about you, or delete your account and all of it.</p></div>
         <div className="flex gap-2">
           <a className="btn btn-ghost" href="/api/account">Export my data</a>

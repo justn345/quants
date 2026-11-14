@@ -16,11 +16,11 @@ async function main() {
     ],
   });
   await tg("setMyShortDescription", {
-    short_description: "AI market alerts for BTC, ETH, SOL and 170+ coins. Signals, price alerts and one-tap trades. Not financial advice.",
+    short_description: "AI market alerts for 170+ coins. Liquidity map, signals, price alerts, one-tap trades. Not financial advice.",
   });
   await tg("setMyDescription", {
     description:
-      "Quants watches the market for you. Pick your coins, set your own price levels, and get a clear alert the moment something happens, with a one-tap Trade button. Built on NEAR. Not financial advice; always do your own research.",
+      "Quants AI watches the market for you. Pick your coins, set your own price levels, and get a clear alert the moment something happens, with a one-tap Trade button. Built on NEAR. Not financial advice; always do your own research.",
   });
   const me = await tg<{ username: string }>("getMe", {});
   const cmds = await tg<{ command: string }[]>("getMyCommands", {});

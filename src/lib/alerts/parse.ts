@@ -35,7 +35,7 @@ export function findCoin(text: string, universe: ReadonlySet<Coin>): Coin | null
     const alias = ALIASES[w.toLowerCase()];
     if (alias && universe.has(alias)) return alias;
     const up = w.toUpperCase();
-    if (STOP.has(up) || /^\d/.test(up)) continue;
+    if (STOP.has(up) || /^\d/.test(up) || up.length < 2) continue;
     const hit = upperMap.get(up) ?? upperMap.get("K" + up); // "PEPE" → "kPEPE"
     if (hit) return hit;
   }
