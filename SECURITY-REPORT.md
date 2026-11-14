@@ -29,4 +29,4 @@ A pass over the brief's security list, testing against the live system where pos
 
 ## Not done (time)
 - Captcha on sign-up (per-IP limits are in place instead).
-- GitHub secret scanning / push protection: will be enabled when the repo is made public.
+- (Done) GitHub secret scanning and push protection are enabled on the public repo.

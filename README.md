@@ -67,6 +67,7 @@ Trade page ─▶ /api/trade/quote ─▶ NEAR Intents 1Click API
 - All input validated server-side with Zod (coins checked against the live universe, prices, amounts, per-chain address formats). User text sent to NEAR AI is sanitised, framed as untrusted data, and the AI output is validated against a strict schema; AI never runs code or touches other users' data.
 - No seed phrases or private keys are ever requested or stored. Quotes come only from the official 1Click API over HTTPS.
 - Per-user and per-IP rate limits for abusers only; demo accounts are per-visitor and IP-limited; `/ask` capped at 20/day.
+- GitHub secret scanning and push protection are on.
 - See [SECURITY-REPORT.md](SECURITY-REPORT.md).
 
 ## Run locally
