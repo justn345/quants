@@ -3,6 +3,7 @@ import { Logo, Disclaimer } from "@/components/ui";
 import { TryDemoButton } from "@/components/TryDemoButton";
 import { NearLogin } from "@/components/NearLogin";
 import { GoogleLogin } from "@/components/GoogleLogin";
+import { TelegramLogin } from "@/components/TelegramLogin";
 import { CoinIcon } from "@/components/CoinIcon";
 
 export default function LoginPage() {
@@ -42,6 +43,7 @@ export default function LoginPage() {
           <h2 className="display text-3xl font-black">Sign in to Quants</h2>
           <p className="mt-1 font-medium text-mist">Never miss the move. No email codes, no passwords.</p>
           <div className="mt-6 space-y-3">
+            <TelegramLogin />
             <GoogleLogin />
             <TryDemoButton className="btn btn-primary w-full" />
             <p className="text-sm font-medium text-mist">The demo opens your own pre-filled account. Nothing to set up.</p>
