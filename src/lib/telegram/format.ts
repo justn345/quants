@@ -65,10 +65,16 @@ export function signalMessage(s: Signal, reason: string, tradeUrl: string, chart
 /** LIQUIDITY MAGNET: price is close to an estimated liquidation stack. */
 export function magnetMessage(o: { coin: string; price: number; cluster: number; side: "long_liq" | "short_liq"; distancePct: number; tradeUrl: string; chartUrl?: string }): TgMessage {
   const who = o.side === "short_liq" ? "short" : "long";
+  // Stack above = short liquidations: price is often pulled UP to sweep them (long opportunity).
+  // Stack below = long liquidations: price is often pulled DOWN to sweep them (short opportunity).
+  const bias = o.side === "short_liq"
+    ? `<b>Possible LONG</b> toward ${fmtPx(o.cluster)}: price is often pulled up to sweep stacked short liquidations, then can reverse.`
+    : `<b>Possible SHORT</b> toward ${fmtPx(o.cluster)}: price is often pulled down to sweep stacked long liquidations, then can bounce.`;
   const lines = [
     `<b>LIQUIDITY MAGNET · ${esc(o.coin)}</b>`,
     `Price ${fmtPx(o.price)} is ${Math.abs(o.distancePct).toFixed(1)}% from a stack of estimated ${who} liquidations near <b>${fmtPx(o.cluster)}</b>.`,
-    "Price often moves fast through these levels.",
+    bias,
+    "Use a stop. Sweeps are fast and can wick past the level.",
     "", `<i>${DISCLAIMER}</i>`,
   ];
   return { text: lines.join("\n"), reply_markup: buttons(o.tradeUrl, undefined, o.chartUrl) };

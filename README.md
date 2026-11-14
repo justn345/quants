@@ -50,7 +50,7 @@ Quants is an **agent that works for each user individually**:
 3. **Only messages you about what you chose.** You pick your coins and which alert types you want per coin. Someone who only follows HYPE never gets a BTC message.
 4. **Remembers your own price levels.** "Tell me if SOL drops 5%", "HYPE at $25.07", "remind me tomorrow at 9am if BTC is below 95k". Any coin, any price, above or below. These are separate from signals: a reminder only tells you **your target was hit**.
 5. **Reaches you where you are**: Telegram, phone notifications (installable web app) and the dashboard.
-6. **Lets you act in one tap.** Every alert has a **Trade** button that opens a phone-first trade page: spot buy/sell **through NEAR Intents straight into your own wallet**, or leverage on Hyperliquid with the signal's levels ready to copy. Quants never holds funds and is not an exchange.
+6. **Lets you act in one tap.** Every alert has a **Trade** button that opens a phone-first trade page with two tabs: **Leverage (long/short)**, where you fund your own Hyperliquid account **through NEAR Intents** from any chain and open the position with the signal's levels, and **Spot (buy/sell)**, which swaps **through NEAR Intents straight into your own wallet**. Quants never holds funds and is not an exchange.
 7. **Keeps itself honest.** Every signal is scored after 4h and 24h (hit target / hit stop / neither) and the real hit rate is shown publicly, even when it's low.
 
 ### Who it helps
@@ -63,7 +63,7 @@ Quants is an **agent that works for each user individually**:
 | Type | Triggered by | Example |
 |---|---|---|
 | **Quants signal** | The agent: a new setup, or the edge disappearing (**WAIT**) | `QUANTS SIGNAL · SOL · LEANING LONG` with entry, stop, target and the NEAR AI reason |
-| **Liquidity magnet** | The agent: price within 1% of a big estimated liquidation stack | `LIQUIDITY MAGNET · BTC`: price is 0.8% from estimated short liquidations near $71,060 |
+| **Liquidity magnet** | The agent: price within 1% of a big estimated liquidation stack | `LIQUIDITY MAGNET · BTC`: price is 0.8% from estimated short liquidations near $71,060. **Possible LONG**: price is often pulled up to sweep them. (Stack below → **possible SHORT**.) |
 | **Target hit / Reminder** | The user's own level or time | `TARGET HIT · HYPE`: your alert "HYPE below $25.07" was hit, price now $25.01 |
 | **Market check** (every 4h, optional) | The agent's "wait or act" summary of your coins | `MARKET CHECK`: no clear setups on your coins, best move right now is wait |
 
@@ -83,6 +83,8 @@ NEAR is not a logo here: each of the three integrations does a job the product c
 4. `GET /v0/status?depositAddress=…`: the trade page polls status (`PENDING_DEPOSIT → PROCESSING → SUCCESS / REFUNDED`).
 
 Safety around it: receiving and refund addresses are **validated per chain** before any quote (EVM, Bitcoin bech32/legacy, Solana, NEAR named/implicit, Tron, XRP, Sui, Aptos, Stellar, Cardano, Litecoin, Dogecoin); slippage is bounded (0.1–3%); amounts are converted to smallest units with BigInt (no float rounding); the app fee hook (`appFees`, paid to a NEAR account inside Intents) is wired but set to **0**.
+
+5. **Leverage funding:** for long/short trades, Quants quotes `destinationAsset: 1cs_v1:hypercore:hip1:…` (Hyperliquid USDC) with the user's Hyperliquid `0x` address as `recipient`. NEAR Intents credits the USDC **directly to the user's Hyperliquid perps balance** from USDC/USDT on any supported chain, with no bridge and no custodian ([`src/app/api/trade/fund`](src/app/api/trade/fund/route.ts), [`src/components/LeverageFlow.tsx`](src/components/LeverageFlow.tsx)). The Leverage tab then shows position size, an estimated liquidation price, and the signal's entry/stop/target to open on Hyperliquid. So **every** trade route, spot or leverage, moves money through NEAR Intents.
 
 **Why NEAR Intents:** it gives a one-step, cross-chain, non-custodial swap from a single API. Without it, "trade from the alert" would mean either holding user funds (custody) or sending users through several bridges and DEXes.
 
@@ -135,6 +137,9 @@ Pure maths, so they work even without AI ([`src/lib/market/signals.ts`](src/lib/
 
 Weighted score ≥ +1.2 → **Leaning long**, ≤ −1.2 → **Leaning short**, otherwise **No clear edge (wait)**. Levels: entry zone around price, stop 1.5 ATR away (or beyond the nearest wall), target 2.5 ATR away **or the nearest big liquidation stack**.
 
+### Long or short from liquidity
+Liquidity stacked **above** price = short positions that would be liquidated on a move up. Price is often pulled **up** to sweep them: a **possible long** toward the stack. Liquidity stacked **below** = long positions that would be liquidated on a move down: a **possible short**. That's why a market that is going up but has its big stack **below** can still lean short. The magnet factor in the score and the LIQUIDITY MAGNET alert both follow this logic.
+
 ### The liquidity map (free liquidation heatmap)
 Exchanges don't publish other traders' liquidation prices, so Quants **estimates** them: open interest is split long/short and spread over the last 24–48h of volume-weighted entry prices, at common leverages (10x 40%, 25x 30%, 50x 20%, 100x 10%) with a 0.5% maintenance margin. Each (entry, leverage) pair gives a liquidation price; these are binned into 0.5% buckets. The coin page shows this as a ladder above and below the current price with the **biggest stack above** (short liquidations, a magnet up) and **below** (long liquidations, a sweep target). Example use: "BTC liquidity is stacked near $63K → set an alert there."
 
@@ -166,7 +171,7 @@ Every long/short signal is checked against the following 15-minute candles after
 | Route | When | How |
 |---|---|---|
 | **Spot via NEAR Intents** | 46 coins (BTC, ETH, SOL, BNB, XRP, DOGE, NEAR, AVAX, LINK, SUI, PEPE, …) | Quote → deposit address → coins to your wallet |
-| **Leverage on Hyperliquid** | All 179 coins | Deep link to the coin in your own Hyperliquid account; the signal's side, entry, stop and target are ready to copy |
+| **Leverage (long/short)** | All 179 coins | **Step 1:** fund your own Hyperliquid perps account through **NEAR Intents** from any chain. **Step 2:** open the position with leverage (1x up to the coin's max), using the signal's side, entry, stop and target. Shows position size and an estimated liquidation price. |
 
 Quants never asks for seed phrases or private keys, and never holds funds. Demo accounts can check live prices but cannot create deposit addresses. Every Trade tap and quote is saved to the user's **Activity** history.
 
@@ -177,7 +182,7 @@ Quants never asks for seed phrases or private keys, and never holds funds. Demo 
 3. **Type** `tell me if SOL drops 5% from now` in **Add alert** → **Check** → **See** the parsed rule → **Save alert**. Try `remind me tomorrow at 9am if BTC is below 95k` (parsed by NEAR AI).
 4. **Open Markets.** **See** all 179 coins with search and filters (*Spot via NEAR Intents*, *Top gainers*, *Top losers*), and a star to follow any coin.
 5. **Click any coin** (e.g. BTC). **See** the big chart (24H / 7D / 30D) with the signal's stop and target drawn on it, the trade plan, the factor breakdown, and the **liquidity map** with the biggest stacks above and below.
-6. **Click Trade** → choose **Buy**, pay with **USDC on Base**, enter an amount and any valid addresses → **Check price**. **See** a live **NEAR Intents** quote (dry, nothing moves). In the demo, deposit addresses are disabled; signed-in users get a real one.
+6. **Click Trade.** On **Leverage**: pick Long/Short and a leverage, enter margin, a Hyperliquid `0x` address and a refund address → **Check funding quote**. **See** NEAR Intents quote USDC straight into a Hyperliquid account. On **Spot**: pay with **USDC on Base** → **Check price** → **See** a live NEAR Intents swap quote. Quotes are dry, so nothing moves. In the demo, deposit addresses are disabled; signed-in users get a real one.
 7. **Open Track record.** **See** every signal as a dot and the real 4h / 24h hit rate.
 8. **Open Activity.** **See** the weekly report and a timeline of messages and Trade taps.
 9. **Telegram:** on the dashboard tap **Connect Telegram** → the bot replies "Connected" with its menu. Try **My signals**, **Market check**, `/ask what's the setup on SOL?`.

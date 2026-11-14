@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase/server";
-import { TradeFlow, CopyPlan } from "@/components/TradeFlow";
+import { TradeTabs } from "@/components/TradeTabs";
 import { CoinIcon, SignalChip, fmtUsd, Logo, Disclaimer } from "@/components/ui";
 import { hyperliquidTradeUrl } from "@/lib/trade/oneclick";
 import { readRef } from "@/lib/server/ref";
@@ -23,8 +23,6 @@ export default async function TradePage({ params, searchParams }: { params: Prom
   // Record the Trade click in the user's own history (never blocks the page).
   const uid = readRef(ref) ?? (await currentUser().catch(() => ({ user: null }))).user?.id ?? null;
   if (uid) await db.from("activity").insert({ user_id: uid, kind: "trade_click", coin, meta: { from: ref ? "alert" : "app" } }).then(() => undefined, () => undefined);
-  const side = sig?.direction === "short" ? "Short" : "Long";
-  const plan = sig ? `${coin} ${side} | Entry ${fmtUsd(+sig.entry_low)}-${fmtUsd(+sig.entry_high)} | Stop ${fmtUsd(+sig.stop)} | Target ${fmtUsd(+sig.target)}` : "";
 
   return (
     <main className="mx-auto min-h-dvh max-w-md bg-paper px-4 pb-10 pt-4">
@@ -44,14 +42,9 @@ export default async function TradePage({ params, searchParams }: { params: Prom
         </>)}
       </section>
 
-      <TradeFlow coin={coin} spot={!!snap.spot_via_intents} price={+snap.price} refToken={readRef(ref) ? ref : null} />
-
-      <section className="card mt-4 p-5">
-        <h2 className="text-lg font-extrabold">Trade with leverage on Hyperliquid</h2>
-        <p className="mt-1 text-sm font-medium text-ink-2">Opens {coin} in your own Hyperliquid account (up to {snap.max_leverage}x). You can fund it with USDC through NEAR Intents above. Quants never touches your funds.</p>
-        {plan && <CopyPlan text={plan} />}
-        <a className="btn btn-dark mt-3 w-full" href={hyperliquidTradeUrl(coin)} target="_blank" rel="noopener noreferrer">Open {coin} on Hyperliquid</a>
-      </section>
+      <TradeTabs coin={coin} spot={!!snap.spot_via_intents} price={+snap.price} maxLev={snap.max_leverage ?? 10} hlUrl={hyperliquidTradeUrl(coin)}
+        refToken={readRef(ref) ? ref : null}
+        sig={sig ? { direction: sig.direction, entryLow: +sig.entry_low, entryHigh: +sig.entry_high, stop: +sig.stop, target: +sig.target } : null} />
       <div className="mt-4"><Disclaimer /></div>
     </main>
   );

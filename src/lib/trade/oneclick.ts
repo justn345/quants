@@ -61,7 +61,10 @@ const ADDRESS_RULES: Record<string, RegExp> = {
   cardano: /^addr1[0-9a-z]{50,120}$/,
 };
 const EVM = /^0x[a-fA-F0-9]{40}$/;
-const EVM_CHAINS = new Set(["eth", "arb", "base", "bsc", "pol", "op", "avax", "gnosis", "bera", "monad", "xlayer", "scroll", "abs", "hood", "plasma"]);
+/** Hyperliquid perps USDC on NEAR Intents (8 decimals). Credited to the user's Hyperliquid perps balance. */
+export const HL_USDC = "1cs_v1:hypercore:hip1:0x6d1e7cde53ba9467b783cb7c530ce054";
+
+const EVM_CHAINS = new Set(["hypercore", "eth", "arb", "base", "bsc", "pol", "op", "avax", "gnosis", "bera", "monad", "xlayer", "scroll", "abs", "hood", "plasma"]);
 
 /** True if the address looks valid for the chain. Unknown chains are rejected (safer). */
 export function isValidAddress(chain: string, address: string): boolean {

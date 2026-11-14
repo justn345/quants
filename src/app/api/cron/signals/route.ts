@@ -89,7 +89,7 @@ export async function POST(req: Request) {
               payload: signalMessage(s, reason.text, tradeUrl, chartUrl), dedupe_key: `signal:${ins?.id}:${sub.user_id}`, send_after: sendAfter });
           }
           if (magnetHit && sub.notify_magnets) {
-            await enqueue(db, { user_id: sub.user_id, signal_id: ins?.id, kind: "magnet", title: `${coin} near a liquidation magnet`, body: `Cluster near ${near!.price}`,
+            await enqueue(db, { user_id: sub.user_id, signal_id: ins?.id, kind: "magnet", title: `${coin}: possible ${near!.side === "short_liq" ? "long" : "short"} (liquidity magnet)`, body: `Liquidity stacked near ${near!.price}`,
               payload: magnetMessage({ coin, price: s.price, cluster: near!.price, side: near!.side, distancePct: near!.distancePct, tradeUrl, chartUrl }),
               dedupe_key: `magnet:${coin}:${near!.side}:${bucket}:${sub.user_id}`, send_after: sendAfter });
           }
