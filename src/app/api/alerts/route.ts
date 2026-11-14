@@ -48,6 +48,7 @@ export async function POST(req: Request) {
     }).select("id").single();
     if (error) return json({ error: "Could not save alert" }, 400);
     await sb.from("watchlist").upsert({ user_id: user.id, coin: r.coin }, { onConflict: "user_id,coin", ignoreDuplicates: true });
+    await adminClient().from("activity").insert({ user_id: user.id, kind: "alert_created", coin: r.coin, meta: { text: (b.sourceText ?? "").slice(0, 140) } });
     return json({ id: data.id });
   }
 

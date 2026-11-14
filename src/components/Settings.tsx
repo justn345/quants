@@ -5,6 +5,8 @@ import { useState } from "react";
 import { browserClient } from "@/lib/supabase/browser";
 import { CoinIcon } from "./ui";
 import { TelegramConnect } from "./TelegramConnect";
+import { ProfileCard } from "./ProfileCard";
+import { PushToggle } from "./PushToggle";
 
 type P = Record<string, unknown> & { id: string };
 type W = { coin: string; notify_signals: boolean; notify_magnets: boolean; notify_price: boolean };
@@ -31,9 +33,12 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
       <div><p className="label">Profile & settings</p><h1 className="display text-3xl font-black sm:text-4xl">Settings</h1></div>
       {msg && <p role="status" className="chip bg-lime px-4 py-2 text-sm text-night">{msg}</p>}
 
+      <ProfileCard uid={String(profile?.id)} name={(profile?.display_name as string) ?? ""} bio={(profile?.bio as string) ?? ""} avatar={(profile?.avatar_url as string) ?? null} checkins={profile?.notify_checkins !== false} demo={!!profile?.is_demo} />
+
+      <PushToggle />
+
       <section className="card grid gap-4 p-6 md:grid-cols-2">
-        <h2 className="text-lg font-extrabold md:col-span-2">Profile & notifications</h2>
-        <label className="space-y-1"><span className="label">Display name</span><input className="input" maxLength={60} value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></label>
+        <h2 className="text-lg font-extrabold md:col-span-2">Notifications</h2>
         <label className="space-y-1"><span className="label">Time zone</span><select className="input" value={f.time_zone} onChange={(e) => setF({ ...f, time_zone: e.target.value })}>{zones.map((z) => <option key={z}>{z}</option>)}</select></label>
         <label className="space-y-1"><span className="label">Quiet hours start</span><input type="time" className="input" value={f.quiet_start} onChange={(e) => setF({ ...f, quiet_start: e.target.value })} /></label>
         <label className="space-y-1"><span className="label">Quiet hours end</span><input type="time" className="input" value={f.quiet_end} onChange={(e) => setF({ ...f, quiet_end: e.target.value })} /></label>
@@ -41,7 +46,8 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
         <label className="space-y-1"><span className="label">Repeat gap (minutes)</span><input type="number" min={5} max={240} className="input num" value={f.repeat_gap_min} onChange={(e) => setF({ ...f, repeat_gap_min: +e.target.value })} /></label>
         <p className="text-sm font-medium text-ink-2 md:col-span-2">Your own price alerts are never dropped: during quiet hours they wait until quiet hours end.</p>
         <div className="md:col-span-2"><button className="btn btn-dark" onClick={async () => {
-          const r = await sb.from("profiles").update({ ...f, quiet_start: f.quiet_start || null, quiet_end: f.quiet_end || null }).eq("id", uid);
+          const { display_name: _dn, ...rest } = f; void _dn;
+          const r = await sb.from("profiles").update({ ...rest, quiet_start: f.quiet_start || null, quiet_end: f.quiet_end || null }).eq("id", uid);
           done(r);
         }}>Save settings</button></div>
       </section>

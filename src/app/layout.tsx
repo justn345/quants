@@ -8,7 +8,9 @@ const ui = Geist({ variable: "--font-ui", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Quants: never miss the move",
   description: "AI market alerts and clear trading signals for BTC, ETH, SOL, BNB, HYPE and 170+ coins. Personal price alerts on Telegram and one-tap, non-custodial trades. Built on NEAR.",
-  icons: { icon: "/icon.svg" },
+  icons: { icon: "/icon.svg", apple: "/icon-192.png" },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Quants", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = { themeColor: "#0f2a1d", width: "device-width", initialScale: 1 };

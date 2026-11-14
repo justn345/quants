@@ -9,6 +9,7 @@ const NAV = [
   ["/app/alerts", "Alerts", "M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"],
   ["/app/signals", "Signals", "M3 12h4l3-8 4 16 3-8h4"],
   ["/app/track", "Record", "M4 20V10M10 20V4M16 20v-6M22 20H2"],
+  ["/app/activity", "Activity", "M12 8v4l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"],
   ["/app/settings", "Settings", "M4 6h16M4 12h16M4 18h16M8 4v4M16 10v4M10 16v4"],
 ] as const;
 
@@ -16,7 +17,11 @@ function Icon({ d, className = "h-5 w-5" }: { d: string; className?: string }) {
   return <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={d} /></svg>;
 }
 
-export function AppShell({ name, demo, children }: { name: string; demo: boolean; children: React.ReactNode }) {
+/* eslint-disable @next/next/no-img-element */
+export function AppShell({ name, demo, avatar = null, admin = false, children }: { name: string; demo: boolean; avatar?: string | null; admin?: boolean; children: React.ReactNode }) {
+  const Avatar = ({ size }: { size: number }) => avatar
+    ? <img src={avatar} alt="" width={size} height={size} className="rounded-full object-cover" style={{ width: size, height: size }} />
+    : <span className="flex items-center justify-center rounded-full bg-signal font-black text-night" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</span>;
   const path = usePathname();
   const active = (h: string) => (h === "/app" ? path === "/app" : path.startsWith(h));
   const initials = name.replace(/[^A-Za-z0-9 ]/g, "").split(" ").map((x) => x[0]).join("").slice(0, 2).toUpperCase() || "Q";
@@ -42,9 +47,10 @@ export function AppShell({ name, demo, children }: { name: string; demo: boolean
           </div>
           <p className="label px-1 text-mist">Account</p>
           <div className="flex items-center gap-3 rounded-2xl border border-forest p-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-signal text-sm font-black text-night">{initials}</span>
+            <Avatar size={36} />
             <div className="min-w-0"><p className="truncate text-sm font-bold">{name}</p><p className="text-xs font-semibold text-mist">{demo ? "Demo account" : "Signed in"}</p></div>
           </div>
+          {admin && <Link href="/admin" className="block rounded-2xl bg-signal px-3 py-2 text-center text-sm font-extrabold text-night">Admin dashboard</Link>}
           <form action="/auth/signout" method="post" className="flex items-center justify-between px-1">
             <button className="text-sm font-semibold text-mist hover:text-cream">Sign out</button>
             <span className="text-xs font-semibold text-mist">Built on NEAR</span>
@@ -56,12 +62,12 @@ export function AppShell({ name, demo, children }: { name: string; demo: boolean
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 bg-[#edf1ea]/95 px-4 py-3 sm:px-8">
           <Link href="/app" className="lg:hidden"><Logo size={28} /></Link>
           <div className="hidden items-center gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-line lg:flex">
-            {NAV.slice(0, 5).map(([h, l]) => <Link key={h} href={h} className={`pill-tab flex items-center ${active(h) ? "on" : "!shadow-none"}`}>{l === "Record" ? "Track record" : l}</Link>)}
+            {NAV.slice(0, 6).map(([h, l]) => <Link key={h} href={h} className={`pill-tab flex items-center ${active(h) ? "on" : "!shadow-none"}`}>{l === "Record" ? "Track record" : l}</Link>)}
           </div>
           <div className="flex items-center gap-2">
             {demo && <span className="chip bg-lime text-night">Demo</span>}
             <Link href="/app/alerts" aria-label="Alerts" className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-line"><Icon d={NAV[2][2]} className="h-4 w-4" /></Link>
-            <Link href="/app/settings" aria-label="Account" className="flex h-10 w-10 items-center justify-center rounded-full bg-night text-sm font-black text-signal">{initials}</Link>
+            <Link href="/app/settings" aria-label="Profile and settings" className="overflow-hidden rounded-full ring-2 ring-white"><Avatar size={40} /></Link>
           </div>
         </header>
         <main className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-8">{children}</main>
