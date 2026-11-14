@@ -40,6 +40,7 @@
 
 html { -webkit-text-size-adjust: 100%; }
 body { background: var(--paper); color: var(--ink); font-family: var(--font-ui), system-ui, sans-serif; }
+@layer components {
 /* App canvas: soft grey-green so white cards float (reference dashboards). */
 .canvas { background: #edf1ea; }
 /* Dark hero panel (reference phone screens): deep forest with solid lime accents. */
@@ -54,9 +55,11 @@ body { background: var(--paper); color: var(--ink); font-family: var(--font-ui),
 .pill-tab { height: 34px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
 .pill-tab[aria-selected="true"], .pill-tab.on { background: var(--night); color: var(--cream); }
 .pill-tab:not(.on):not([aria-selected="true"]) { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+}
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .display { font-family: var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
 
+@layer components {
 /* Floating surfaces: solid cards, subtle border, layered soft shadow. */
 .card {
   background: #fff;
@@ -108,6 +111,7 @@ a.card:hover, .card.lift:hover {
   background: #fff; color: var(--ink); font-size: 16px;
 }
 .input:focus { outline: none; border-color: var(--forest); }
+}
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 /* Scroll reveal (respects reduced motion). */
