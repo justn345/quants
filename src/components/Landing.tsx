@@ -5,6 +5,7 @@ import { Intro } from "./Intro";
 import { CoinIcon, Logo, Pct, fmtUsd } from "./ui";
 import { TryDemoButton } from "./TryDemoButton";
 import { SiteMenu } from "./SiteMenu";
+import { Spark } from "./Spark";
 
 type Snap = { coin: string; price: number; change_24h_pct: number; spot_via_intents: boolean };
 const STRIP = ["BTC", "ETH", "SOL", "BNB", "HYPE"];
@@ -27,6 +28,8 @@ export function Landing() {
   }, []);
 
   const strip = STRIP.map((c) => coins.find((x) => x.coin === c)).filter(Boolean) as Snap[];
+  const hype = coins.find((x) => x.coin === "HYPE");
+  const lvl = hype ? +(hype.price * 0.99).toPrecision(4) : 25.07;
 
   return (
     <>
@@ -54,15 +57,29 @@ export function Landing() {
               <Link href="/login" className="btn btn-ghost h-12 px-6 text-base text-cream">Sign in</Link>
             </div>
           </div>
-          <div className="glass p-5 sm:p-6">
-            <div className="flex items-center justify-between">
-              <span className="label text-mist">Alert · Telegram</span><span className="chip chip-long">▲ Leaning long</span>
+          <div className="relative mx-auto w-full max-w-md lg:h-[440px]">
+            {/* Floating price card */}
+            <div className="panel-dark relative z-10 mb-4 w-56 -rotate-2 p-4 lg:absolute lg:-left-6 lg:top-0 lg:mb-0">
+              <div className="flex items-center gap-2"><CoinIcon coin="HYPE" size={26} /><span className="font-extrabold">HYPE</span><span className="ml-auto text-xs"><Pct v={hype?.change_24h_pct} /></span></div>
+              <p className="display num mt-2 text-2xl font-black">{fmtUsd(hype?.price)}</p>
+              <div className="mt-1"><Spark coin="HYPE" group={STRIP} width={190} height={34} dark /></div>
             </div>
-            <p className="display mt-4 text-2xl font-extrabold">HYPE is above $25.07</p>
-            <p className="num mt-1 text-mist">Now $25.31 · Entry $25.10–25.25 · Stop $24.60 · Target $26.40</p>
-            <p className="mt-4 text-sm text-cream">Trend is up and estimated short liquidations sit near $26.40.</p>
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <span className="btn btn-primary">Trade</span><span className="btn btn-ghost text-cream">Got it</span>
+            {/* Main alert card (subtle glass, landing only) */}
+            <div className="glass relative z-20 p-5 sm:p-6 lg:absolute lg:right-0 lg:top-24 lg:w-[400px]">
+              <div className="flex items-center justify-between">
+                <span className="label flex items-center gap-2 text-mist"><span className="h-2 w-2 rounded-full bg-signal" />Quants · Telegram alert</span><span className="chip chip-long">▲ Leaning long</span>
+              </div>
+              <p className="display mt-4 text-2xl font-extrabold">HYPE is above {fmtUsd(lvl)}</p>
+              <p className="num mt-1 text-sm font-semibold text-mist">Now {fmtUsd(hype?.price)} · Stop {fmtUsd(lvl * 0.975)} · Target {fmtUsd(lvl * 1.04)}</p>
+              <p className="mt-3 text-sm text-cream">Trend is up and estimated short liquidations sit just above. Reason written by NEAR AI.</p>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <span className="btn btn-primary">Trade</span><span className="btn btn-ghost text-cream">Got it</span>
+              </div>
+            </div>
+            {/* Settlement chip */}
+            <div className="panel-dark relative z-30 mt-4 flex w-64 rotate-1 items-center gap-3 p-3 lg:absolute lg:bottom-0 lg:left-4 lg:mt-0">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-signal text-night"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden><path d="M5 12l5 5 9-10" /></svg></span>
+              <div><p className="text-sm font-extrabold">Swap settled</p><p className="text-xs font-semibold text-mist">via NEAR Intents · to your own wallet</p></div>
             </div>
           </div>
         </div>
@@ -71,7 +88,7 @@ export function Landing() {
       <section aria-label="Live prices" className="border-y border-forest bg-[#0c2418] px-4 py-4 sm:px-8">
         <div className="mx-auto flex max-w-6xl gap-6 overflow-x-auto">
           {(strip.length ? strip : STRIP.map((c) => ({ coin: c, price: NaN, change_24h_pct: NaN }) as Snap)).map((c) => (
-            <div key={c.coin} className="flex shrink-0 items-center gap-3 pr-2">
+            <div key={c.coin} className="flex shrink-0 items-center gap-3 rounded-2xl border border-forest bg-night px-4 py-2.5">
               <CoinIcon coin={c.coin} size={30} />
               <div><p className="text-sm font-bold">{c.coin}</p><p className="num text-sm text-mist">{fmtUsd(c.price)} <Pct v={c.change_24h_pct} /></p></div>
             </div>
