@@ -19,5 +19,16 @@ Short notes on choices made while building, so you can review them later.
 - **Watch-out**: Hyperliquid "k" coins (kPEPE, kSHIB) are priced per 1,000 tokens; the trade page must convert when quoting the real token.
 - **Signals for many coins**: computed each cycle only for featured + followed coins, to stay inside Hyperliquid's rate limits.
 
+## Decided on my own while you were away (please review)
+- **Telegram bot**: your bot is **@QuantsSignal_Bot** (not @QuantsAlertBot from the brief). I set its 6 commands, description and About text through the Bot API. Telegram limits About to 120 characters, so it now reads: "AI market alerts for BTC, ETH, SOL and 170+ coins. Signals, price alerts and one-tap trades. Not financial advice." The profile picture is still pending (logo file missing).
+- **Your personal price alerts are never dropped**: during quiet hours they wait until quiet hours end. The "max alerts per day" cap applies to signal and liquidation-magnet alerts only, not to alerts you set yourself.
+- **Reminders with a condition** ("remind me at 9am if BTC is below 95k"): if the condition is false at 9am, the reminder is closed quietly instead of being sent.
+- **Repeat until seen**: up to 3 sends in total (the first plus 2 repeats), every 15 minutes by default.
+- **Abuse limit**: at most 500 open alerts per user (normal users never get near this).
+- **1Click app fee**: supported (paid in basis points to a NEAR account inside Intents). Config `ONECLICK_APP_FEE_BPS`, default **0**, paid to `NEAR_PAYOUT_ACCOUNT` only if you set it above 0.
+- **Dry quotes tested**: $20 USDC on Base → 0.000265 BTC (~$18.28, BTC network costs included, ~8 min) and → 0.248 SOL (~$19.93, ~30 s). No real transaction was made.
+- **Database permissions**: browser users can only edit safe columns (not admin flags, Telegram chat id, or alert send counters).
+- **NEAR payout account** saved as `sillymask4660.near` (from your NEAR Builders dashboard). Confirm before submission.
+
 ## After the hackathon (not built now)
 - Hyperliquid builder codes would let Quants place leveraged orders inside the app (user signs with their own wallet) and earn a small fee per trade without referral volume.
