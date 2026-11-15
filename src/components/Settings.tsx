@@ -12,7 +12,7 @@ type P = Record<string, unknown> & { id: string };
 type W = { coin: string; notify_signals: boolean; notify_magnets: boolean; notify_price: boolean };
 type Ad = { id: string; chain: string; address: string; label: string | null };
 
-export function Settings({ profile, watch, addrs, allCoins }: { profile: P | null; watch: W[]; addrs: Ad[]; allCoins: string[] }) {
+export function Settings({ profile, watch, addrs, allCoins, admin = false }: { profile: P | null; watch: W[]; addrs: Ad[]; allCoins: string[]; admin?: boolean }) {
   const sb = browserClient();
   const router = useRouter();
   const [msg, setMsg] = useState("");
@@ -37,6 +37,13 @@ export function Settings({ profile, watch, addrs, allCoins }: { profile: P | nul
       <nav aria-label="More" className="grid grid-cols-3 gap-2 lg:hidden">
         {[["/app/signals","Signals"],["/app/track","Track record"],["/app/activity","Activity"]].map(([h,l]) => <a key={h} href={h} className="btn btn-light h-11 text-sm">{l}</a>)}
       </nav>
+
+      {admin && (
+        <section className="hero-dark flex flex-wrap items-center justify-between gap-4 p-6">
+          <div><h2 className="text-lg font-extrabold">Admin dashboard</h2><p className="text-sm font-medium text-mist">Sign-ups, activity and usage. Only you can see this.</p></div>
+          <a href="/admin" className="btn btn-primary h-11 px-5">Open admin</a>
+        </section>
+      )}
 
       <ProfileCard uid={String(profile?.id)} name={(profile?.display_name as string) ?? ""} bio={(profile?.bio as string) ?? ""} avatar={(profile?.avatar_url as string) ?? null} checkins={profile?.notify_checkins !== false} demo={!!profile?.is_demo} />
 

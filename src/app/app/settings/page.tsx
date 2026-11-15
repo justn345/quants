@@ -1,5 +1,6 @@
 import { currentUser } from "@/lib/supabase/server";
 import { Settings } from "@/components/Settings";
+import { isAdminUser } from "@/lib/server/admin";
 
 export default async function SettingsPage() {
   const { sb, user } = await currentUser();
@@ -9,5 +10,5 @@ export default async function SettingsPage() {
     sb.from("receive_addresses").select("*").eq("user_id", user!.id),
     sb.from("market_snapshots").select("coin").order("volume_24h_usd", { ascending: false }),
   ]);
-  return <Settings profile={profile} watch={watch ?? []} addrs={addrs ?? []} allCoins={(snaps ?? []).map((s) => s.coin)} />;
+  return <Settings profile={profile} watch={watch ?? []} addrs={addrs ?? []} allCoins={(snaps ?? []).map((s) => s.coin)} admin={isAdminUser(user)} />;
 }
